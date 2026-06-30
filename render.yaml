@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: glucocontrol-ips
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx prisma generate && npx prisma db push && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DATABASE_URL
+        value: file:./prisma/prod.db
+    disk:
+      name: glucocontrol-data
+      mountPath: /opt/render/project/src/prisma
+      sizeGB: 1

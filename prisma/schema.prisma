@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  diabetesType String   @default("tipo2")
+  targetMin    Int      @default(70)
+  targetMax    Int      @default(140)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model GlucoseReading {
+  id        String   @id @default(cuid())
+  value     Int
+  notes     String?
+  source    String   @default("manual")
+  createdAt DateTime @default(now())
+}
+
+model MealEntry {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   @default("comida")
+  carbs     Float    @default(0)
+  calories  Float?
+  notes     String?
+  createdAt DateTime @default(now())
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+}
