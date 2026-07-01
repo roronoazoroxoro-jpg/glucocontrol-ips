@@ -35,3 +35,6 @@ next-env.d.ts
 /prisma/*.db
 /prisma/*.db-journal
 .vercel
+.env*
+/tools/
+.vercel-patch.json

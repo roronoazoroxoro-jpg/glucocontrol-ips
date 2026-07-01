@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma, withDbTimeout } from "@/lib/db";
 import { dbErrorResponse } from "@/lib/api-error";
+import { ensureProductionDatabase } from "@/lib/init-db";
 import { DEFAULT_REMINDERS } from "@/lib/reminders";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
+    await ensureProductionDatabase();
     const user = await withDbTimeout(prisma.user.findFirst());
     return NextResponse.json({ user });
   } catch (error) {
@@ -16,6 +18,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    await ensureProductionDatabase();
     const body = await request.json();
   const {
     name,
