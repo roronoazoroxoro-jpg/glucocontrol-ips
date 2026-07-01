@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Activity, Download, LayoutDashboard, MessageSquare, Settings } from "lucide-react";
+import { Activity, Download, LayoutDashboard, MessageSquare, RefreshCw, Settings } from "lucide-react";
 import { IPSLogo } from "./IPSLogo";
 import { Onboarding } from "./Onboarding";
 import { GlucoseCard } from "./GlucoseCard";
@@ -56,16 +56,38 @@ type Tab = "dashboard" | "historial" | "chat" | "perfil";
 export function DashboardApp() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>("day");
   const [data, setData] = useState<DashboardData | null>(null);
   const [tab, setTab] = useState<Tab>("dashboard");
   const [showGlucoseModal, setShowGlucoseModal] = useState(false);
 
   const fetchUser = useCallback(async () => {
-    const res = await fetch("/api/user");
-    const d = await res.json();
-    setUser(d.user);
-    setLoading(false);
+    setLoadError(null);
+    setLoading(true);
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
+      const res = await fetch("/api/user", { signal: controller.signal });
+      clearTimeout(timeout);
+
+      const d = await res.json();
+      if (!res.ok) {
+        throw new Error(d.error ?? "No se pudo conectar con el servidor");
+      }
+      setUser(d.user);
+    } catch (err) {
+      const message =
+        err instanceof Error && err.name === "AbortError"
+          ? "El servidor tardó demasiado en responder"
+          : err instanceof Error
+            ? err.message
+            : "Error de conexión";
+      setLoadError(message);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const fetchDashboard = useCallback(async () => {
@@ -87,6 +109,27 @@ export function DashboardApp() {
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 safe-top">
         <IPSLogo size="md" />
         <p className="text-sm text-slate-500">Cargando GlucoControl IPS...</p>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 safe-top text-center">
+        <IPSLogo size="md" />
+        <p className="text-slate-700 font-medium">No pudimos conectar con el servidor</p>
+        <p className="text-sm text-slate-500 max-w-sm">{loadError}</p>
+        <button
+          type="button"
+          onClick={fetchUser}
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1e5a9e] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#174a82] transition-colors"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Reintentar
+        </button>
+        <Link href="/" className="text-sm text-[#1e5a9e] hover:underline">
+          Volver al inicio
+        </Link>
       </div>
     );
   }

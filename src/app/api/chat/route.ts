@@ -1,32 +1,49 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, withDbTimeout } from "@/lib/db";
+import { dbErrorResponse } from "@/lib/api-error";
 import { generateChatResponse } from "@/lib/ai";
 
+export const runtime = "nodejs";
+
 export async function GET() {
-  const messages = await prisma.chatMessage.findMany({
-    orderBy: { createdAt: "asc" },
-    take: 100,
-  });
-  return NextResponse.json({ messages });
+  try {
+    const messages = await withDbTimeout(
+      prisma.chatMessage.findMany({
+        orderBy: { createdAt: "asc" },
+        take: 100,
+      })
+    );
+    return NextResponse.json({ messages });
+  } catch (error) {
+    return dbErrorResponse("api/chat GET", error);
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const { message } = body;
+  try {
+    const body = await request.json();
+    const { message } = body;
 
-  if (!message?.trim()) {
-    return NextResponse.json({ error: "Mensaje vacío" }, { status: 400 });
+    if (!message?.trim()) {
+      return NextResponse.json({ error: "Mensaje vacío" }, { status: 400 });
+    }
+
+    await withDbTimeout(
+      prisma.chatMessage.create({
+        data: { role: "user", content: message.trim() },
+      })
+    );
+
+    const response = await generateChatResponse(message.trim());
+
+    const assistantMessage = await withDbTimeout(
+      prisma.chatMessage.create({
+        data: { role: "assistant", content: response },
+      })
+    );
+
+    return NextResponse.json({ message: assistantMessage });
+  } catch (error) {
+    return dbErrorResponse("api/chat POST", error);
   }
-
-  await prisma.chatMessage.create({
-    data: { role: "user", content: message.trim() },
-  });
-
-  const response = await generateChatResponse(message.trim());
-
-  const assistantMessage = await prisma.chatMessage.create({
-    data: { role: "assistant", content: response },
-  });
-
-  return NextResponse.json({ message: assistantMessage });
 }
