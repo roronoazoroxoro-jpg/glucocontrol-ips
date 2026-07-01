@@ -8,13 +8,18 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  diabetesType String   @default("tipo2")
-  targetMin    Int      @default(70)
-  targetMax    Int      @default(140)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                     String   @id @default(cuid())
+  name                   String
+  diabetesType           String   @default("tipo2")
+  targetMin              Int      @default(70)
+  targetMax              Int      @default(140)
+  doctorName             String?
+  medications            String?
+  mealTimes              String?
+  glucoseIntervalHours   Int      @default(4)
+  notificationsEnabled   Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
 
 model GlucoseReading {
@@ -26,18 +31,34 @@ model GlucoseReading {
 }
 
 model MealEntry {
-  id        String   @id @default(cuid())
-  name      String
-  type      String   @default("comida")
-  carbs     Float    @default(0)
-  calories  Float?
-  notes     String?
-  createdAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  name           String
+  type           String   @default("comida")
+  carbs          Float    @default(0)
+  sugar          Float?
+  fat            Float?
+  saturatedFat   Float?
+  protein        Float?
+  fiber          Float?
+  sodium         Float?
+  calories       Float?
+  servingSize    String?
+  autoAnalyzed   Boolean  @default(true)
+  nutritionSource String?
+  notes          String?
+  createdAt      DateTime @default(now())
 }
 
 model ChatMessage {
   id        String   @id @default(cuid())
   role      String
   content   String
+  createdAt DateTime @default(now())
+}
+
+model NutritionCache {
+  id        String   @id @default(cuid())
+  query     String   @unique
+  result    String
   createdAt DateTime @default(now())
 }

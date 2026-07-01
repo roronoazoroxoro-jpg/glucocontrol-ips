@@ -36,13 +36,17 @@ export interface StatsSummary {
   maxGlucose: number | null;
   totalMeals: number;
   totalCarbs: number;
+  totalSugar: number;
+  totalFat: number;
+  totalCalories: number;
+  totalProtein: number;
   readingsCount: number;
   inRangePercent: number | null;
 }
 
 export function computeStats(
   readings: { value: number }[],
-  meals: { carbs: number }[],
+  meals: { carbs: number; sugar?: number | null; fat?: number | null; calories?: number | null; protein?: number | null }[],
   targetMin = 70,
   targetMax = 140
 ): StatsSummary {
@@ -66,6 +70,10 @@ export function computeStats(
     maxGlucose: values.length > 0 ? Math.max(...values) : null,
     totalMeals: meals.length,
     totalCarbs: Math.round(meals.reduce((a, m) => a + m.carbs, 0)),
+    totalSugar: Math.round(meals.reduce((a, m) => a + (m.sugar ?? 0), 0)),
+    totalFat: Math.round(meals.reduce((a, m) => a + (m.fat ?? 0), 0)),
+    totalCalories: Math.round(meals.reduce((a, m) => a + (m.calories ?? 0), 0)),
+    totalProtein: Math.round(meals.reduce((a, m) => a + (m.protein ?? 0), 0)),
     readingsCount: readings.length,
     inRangePercent: inRange,
   };

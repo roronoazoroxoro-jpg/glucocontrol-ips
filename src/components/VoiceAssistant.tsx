@@ -80,12 +80,17 @@ export function VoiceAssistant({ userName, onMealLogged }: VoiceAssistantProps) 
         const match = text.match(pattern);
         if (match?.[1]) {
           const mealName = match[1].trim();
-          await fetch("/api/meals", {
+          const res = await fetch("/api/meals", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: mealName, type: "comida" }),
           });
-          const msg = `${userName}, registré que comiste ${mealName}. ¿Algo más?`;
+          const data = await res.json();
+          const n = data.nutrition;
+          const nutritionPart = n
+            ? ` Analicé ${n.carbs} gramos de carbohidratos, ${n.sugar} de azúcares y ${n.fat} de grasas.`
+            : "";
+          const msg = `${userName}, registré que comió ${mealName}.${nutritionPart} Consulte con su médico asignado si tiene dudas.`;
           setResponse(msg);
           speak(msg);
           onMealLogged?.();

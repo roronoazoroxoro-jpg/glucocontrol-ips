@@ -8,7 +8,17 @@ import type { Period } from "@/lib/stats";
 interface HistoryPanelProps {
   period: Period;
   onPeriodChange: (p: Period) => void;
-  meals: { id: string; name: string; type: string; carbs: number; createdAt: string }[];
+  meals: {
+    id: string;
+    name: string;
+    type: string;
+    carbs: number;
+    sugar?: number | null;
+    fat?: number | null;
+    protein?: number | null;
+    calories?: number | null;
+    createdAt: string;
+  }[];
   readings: { id: string; value: number; createdAt: string }[];
 }
 
@@ -36,7 +46,16 @@ export function HistoryPanel({
       id: m.id,
       type: "meal" as const,
       label: m.name,
-      sub: `${m.type} · ${m.carbs}g carbohidratos`,
+      sub: [
+        m.type,
+        `${m.carbs}g carbs`,
+        m.sugar != null ? `${m.sugar}g azúcar` : null,
+        m.fat != null ? `${m.fat}g grasa` : null,
+        m.protein != null ? `${m.protein}g prot` : null,
+        m.calories != null ? `${m.calories} kcal` : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
       date: m.createdAt,
     })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { DEFAULT_REMINDERS } from "@/lib/reminders";
 
 export async function GET() {
   const user = await prisma.user.findFirst();
@@ -8,7 +9,17 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { name, diabetesType, targetMin, targetMax } = body;
+  const {
+    name,
+    diabetesType,
+    targetMin,
+    targetMax,
+    doctorName,
+    medications,
+    mealTimes,
+    glucoseIntervalHours,
+    notificationsEnabled,
+  } = body;
 
   if (!name?.trim()) {
     return NextResponse.json({ error: "El nombre es requerido" }, { status: 400 });
@@ -16,22 +27,25 @@ export async function POST(request: Request) {
 
   const existing = await prisma.user.findFirst();
 
+  const data = {
+    name: name.trim(),
+    diabetesType: diabetesType ?? "tipo2",
+    targetMin: targetMin ?? 70,
+    targetMax: targetMax ?? 140,
+    doctorName: doctorName?.trim() || null,
+    medications: medications ? JSON.stringify(medications) : undefined,
+    mealTimes: mealTimes ? JSON.stringify(mealTimes) : undefined,
+    glucoseIntervalHours: glucoseIntervalHours ?? 4,
+    notificationsEnabled: notificationsEnabled ?? true,
+  };
+
   const user = existing
-    ? await prisma.user.update({
-        where: { id: existing.id },
-        data: {
-          name: name.trim(),
-          diabetesType: diabetesType ?? "tipo2",
-          targetMin: targetMin ?? 70,
-          targetMax: targetMax ?? 140,
-        },
-      })
+    ? await prisma.user.update({ where: { id: existing.id }, data })
     : await prisma.user.create({
         data: {
-          name: name.trim(),
-          diabetesType: diabetesType ?? "tipo2",
-          targetMin: targetMin ?? 70,
-          targetMax: targetMax ?? 140,
+          ...data,
+          mealTimes: JSON.stringify(mealTimes ?? DEFAULT_REMINDERS.mealTimes),
+          medications: JSON.stringify(medications ?? []),
         },
       });
 
@@ -46,9 +60,41 @@ export async function POST(request: Request) {
     });
     await prisma.mealEntry.createMany({
       data: [
-        { name: "Avena con frutas", type: "desayuno", carbs: 35, createdAt: new Date(now - 3600000 * 3) },
-        { name: "Agua", type: "bebida", carbs: 0, createdAt: new Date(now - 3600000 * 2) },
-        { name: "Ensalada con pollo", type: "comida", carbs: 18, createdAt: new Date(now - 3600000) },
+        {
+          name: "Avena con frutas",
+          type: "desayuno",
+          carbs: 40,
+          sugar: 18,
+          fat: 4,
+          protein: 7,
+          calories: 220,
+          autoAnalyzed: true,
+          nutritionSource: "local",
+          createdAt: new Date(now - 3600000 * 3),
+        },
+        {
+          name: "Agua",
+          type: "bebida",
+          carbs: 0,
+          sugar: 0,
+          fat: 0,
+          calories: 0,
+          autoAnalyzed: true,
+          nutritionSource: "local",
+          createdAt: new Date(now - 3600000 * 2),
+        },
+        {
+          name: "Ensalada con pollo",
+          type: "comida",
+          carbs: 10,
+          sugar: 5,
+          fat: 12,
+          protein: 28,
+          calories: 250,
+          autoAnalyzed: true,
+          nutritionSource: "local",
+          createdAt: new Date(now - 3600000),
+        },
       ],
     });
   }

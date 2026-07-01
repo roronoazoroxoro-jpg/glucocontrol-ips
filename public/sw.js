@@ -1,4 +1,4 @@
-const CACHE_NAME = "glucocontrol-ips-v2";
+const CACHE_NAME = "glucocontrol-ips-v3";
 const STATIC_ASSETS = [
   "/",
   "/app",
@@ -52,6 +52,19 @@ self.addEventListener("fetch", (event) => {
         .catch(() => cached);
 
       return cached || network;
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url ?? "/app";
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if (client.url.includes(url) && "focus" in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow(url);
     })
   );
 });

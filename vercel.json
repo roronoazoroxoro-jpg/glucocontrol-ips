@@ -1,5 +1,9 @@
 {
   "buildCommand": "npm install && npx prisma generate && npx prisma db push && npm run build",
-  "startCommand": "npm start",
-  "installCommand": "npm install"
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "env": {
+    "DATABASE_URL": "file:/tmp/glucocontrol.db",
+    "USDA_API_KEY": "DEMO_KEY"
+  }
 }

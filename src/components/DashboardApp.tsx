@@ -14,6 +14,8 @@ import { HistoryPanel } from "./HistoryPanel";
 import { ChatPanel } from "./ChatPanel";
 import { VoiceAssistant } from "./VoiceAssistant";
 import { InstallPrompt } from "./InstallPrompt";
+import { NotificationScheduler, UpcomingRemindersBanner } from "./NotificationScheduler";
+import { parseMedications, parseMealTimes, DEFAULT_REMINDERS, type Medication } from "@/lib/reminders";
 import type { GlucoseAnalysis } from "@/lib/recommendations";
 import type { StatsSummary, Period } from "@/lib/stats";
 import { cn } from "@/lib/utils";
@@ -24,11 +26,26 @@ interface User {
   diabetesType: string;
   targetMin: number;
   targetMax: number;
+  doctorName?: string | null;
+  medications?: string | null;
+  mealTimes?: string | null;
+  glucoseIntervalHours?: number;
+  notificationsEnabled?: boolean;
 }
 
 interface DashboardData {
   readings: { id: string; value: number; createdAt: string }[];
-  meals: { id: string; name: string; type: string; carbs: number; createdAt: string }[];
+  meals: {
+    id: string;
+    name: string;
+    type: string;
+    carbs: number;
+    sugar?: number | null;
+    fat?: number | null;
+    protein?: number | null;
+    calories?: number | null;
+    createdAt: string;
+  }[];
   latest: { value: number } | null;
   stats: StatsSummary;
   recommendation: GlucoseAnalysis | null;
@@ -134,6 +151,8 @@ export function DashboardApp() {
               onGlucoseClose={() => setShowGlucoseModal(false)}
             />
 
+            <UpcomingRemindersBanner />
+
             {data && (
               <>
                 <StatsCards stats={data.stats} />
@@ -194,6 +213,7 @@ export function DashboardApp() {
       </nav>
 
       <VoiceAssistant userName={user.name} onMealLogged={fetchDashboard} />
+      <NotificationScheduler enabled={user.notificationsEnabled !== false} />
       <InstallPrompt />
     </div>
   );
@@ -208,14 +228,59 @@ function ProfilePanel({
 }) {
   const [name, setName] = useState(user.name);
   const [diabetesType, setDiabetesType] = useState(user.diabetesType);
+  const [doctorName, setDoctorName] = useState(user.doctorName ?? "");
+  const [glucoseInterval, setGlucoseInterval] = useState(user.glucoseIntervalHours ?? 4);
+  const [mealTimes, setMealTimes] = useState(parseMealTimes(user.mealTimes).join(", "));
+  const [medications, setMedications] = useState<Medication[]>(
+    parseMedications(user.medications)
+  );
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    user.notificationsEnabled !== false
+  );
+  const [medName, setMedName] = useState("");
+  const [medTime, setMedTime] = useState("08:00");
   const [saved, setSaved] = useState(false);
+  const [notifStatus, setNotifStatus] = useState<string | null>(null);
+
+  async function enableNotifications() {
+    const { requestNotificationPermission } = await import("@/lib/reminders");
+    const ok = await requestNotificationPermission();
+    setNotifStatus(ok ? "Notificaciones activadas ✓" : "Permiso denegado");
+    if (ok) setNotificationsEnabled(true);
+  }
+
+  function addMedication() {
+    if (!medName.trim()) return;
+    setMedications((prev) => [
+      ...prev,
+      { name: medName.trim(), times: [medTime] },
+    ]);
+    setMedName("");
+  }
+
+  function removeMedication(index: number) {
+    setMedications((prev) => prev.filter((_, i) => i !== index));
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    const times = mealTimes
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+
     await fetch("/api/user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, diabetesType }),
+      body: JSON.stringify({
+        name,
+        diabetesType,
+        doctorName,
+        glucoseIntervalHours: glucoseInterval,
+        mealTimes: times.length > 0 ? times : DEFAULT_REMINDERS.mealTimes,
+        medications,
+        notificationsEnabled,
+      }),
     });
     setSaved(true);
     onUpdate();
@@ -223,44 +288,164 @@ function ProfilePanel({
   }
 
   return (
-    <div className="glass-card rounded-2xl p-6 max-w-lg">
-      <h3 className="font-semibold text-slate-800 mb-4">Mi perfil</h3>
-      <form onSubmit={handleSave} className="space-y-4">
-        <div>
-          <label className="text-sm text-slate-600 mb-1 block">Nombre</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-400 outline-none"
-          />
-        </div>
-        <div>
-          <label className="text-sm text-slate-600 mb-1 block">Tipo de diabetes</label>
-          <select
-            value={diabetesType}
-            onChange={(e) => setDiabetesType(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white"
+    <div className="space-y-4 max-w-lg">
+      <div className="glass-card rounded-2xl p-6">
+        <h3 className="font-semibold text-slate-800 mb-4">Mi perfil</h3>
+        <form onSubmit={handleSave} className="space-y-4">
+          <div>
+            <label className="text-sm text-slate-600 mb-1 block">Nombre</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-400 outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-sm text-slate-600 mb-1 block">Tipo de diabetes</label>
+            <select
+              value={diabetesType}
+              onChange={(e) => setDiabetesType(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white"
+            >
+              <option value="tipo1">Tipo 1</option>
+              <option value="tipo2">Tipo 2</option>
+              <option value="gestacional">Gestacional</option>
+              <option value="prediabetes">Prediabetes</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-sm text-slate-600 mb-1 block">Médico asignado (IPS)</label>
+            <input
+              type="text"
+              value={doctorName}
+              onChange={(e) => setDoctorName(e.target.value)}
+              placeholder="Ej: Dr. García"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-400 outline-none"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full py-2.5 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition touch-manipulation"
           >
-            <option value="tipo1">Tipo 1</option>
-            <option value="tipo2">Tipo 2</option>
-            <option value="gestacional">Gestacional</option>
-            <option value="prediabetes">Prediabetes</option>
-          </select>
-        </div>
-        <button
-          type="submit"
-          className="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition"
-        >
-          {saved ? "Guardado ✓" : "Guardar cambios"}
-        </button>
-      </form>
+            {saved ? "Guardado ✓" : "Guardar perfil"}
+          </button>
+        </form>
+      </div>
 
-      <div className="mt-8 p-4 rounded-xl bg-amber-50 border border-amber-200">
+      <div className="glass-card rounded-2xl p-6">
+        <h3 className="font-semibold text-slate-800 mb-1">Recordatorios</h3>
+        <p className="text-xs text-slate-500 mb-4">
+          Notificaciones en su celular para glucosa, comidas y medicación
+        </p>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-slate-700">Notificaciones activas</span>
+            <button
+              type="button"
+              onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+              className={cn(
+                "w-12 h-7 rounded-full transition relative",
+                notificationsEnabled ? "bg-emerald-500" : "bg-slate-300"
+              )}
+            >
+              <span
+                className={cn(
+                  "absolute top-1 w-5 h-5 rounded-full bg-white shadow transition",
+                  notificationsEnabled ? "left-6" : "left-1"
+                )}
+              />
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={enableNotifications}
+            className="w-full py-2 rounded-xl border border-emerald-300 text-emerald-700 text-sm font-medium touch-manipulation"
+          >
+            Activar permisos de notificación
+          </button>
+          {notifStatus && <p className="text-xs text-emerald-600">{notifStatus}</p>}
+
+          <div>
+            <label className="text-sm text-slate-600 mb-1 block">
+              Medir glucosa cada (horas)
+            </label>
+            <select
+              value={glucoseInterval}
+              onChange={(e) => setGlucoseInterval(parseInt(e.target.value, 10))}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white"
+            >
+              <option value={2}>Cada 2 horas</option>
+              <option value={4}>Cada 4 horas</option>
+              <option value={6}>Cada 6 horas</option>
+              <option value={8}>Cada 8 horas</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm text-slate-600 mb-1 block">
+              Horarios de comida (HH:MM, separados por coma)
+            </label>
+            <input
+              type="text"
+              value={mealTimes}
+              onChange={(e) => setMealTimes(e.target.value)}
+              placeholder="07:30, 12:30, 20:00"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm text-slate-600 mb-2 block">Medicamentos / pastillas</label>
+            {medications.map((med, i) => (
+              <div key={i} className="flex items-center justify-between bg-slate-50 rounded-lg px-3 py-2 mb-2 text-sm">
+                <span>{med.name} — {med.times.join(", ")}</span>
+                <button type="button" onClick={() => removeMedication(i)} className="text-red-500 text-xs">
+                  Quitar
+                </button>
+              </div>
+            ))}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={medName}
+                onChange={(e) => setMedName(e.target.value)}
+                placeholder="Ej: Metformina"
+                className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm"
+              />
+              <input
+                type="time"
+                value={medTime}
+                onChange={(e) => setMedTime(e.target.value)}
+                className="px-2 py-2 rounded-lg border border-slate-200 text-sm"
+              />
+              <button
+                type="button"
+                onClick={addMedication}
+                className="px-3 py-2 rounded-lg bg-emerald-100 text-emerald-700 text-sm font-medium"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleSave({ preventDefault: () => {} } as React.FormEvent)}
+            className="w-full py-2.5 rounded-xl bg-teal-600 text-white font-medium touch-manipulation"
+          >
+            Guardar recordatorios
+          </button>
+        </div>
+      </div>
+
+      <div className="glass-card rounded-2xl p-4 bg-amber-50 border border-amber-200">
         <p className="text-xs text-amber-800 leading-relaxed">
-          <strong>Aviso médico:</strong> GlucoControl IPS es una herramienta de apoyo
-          informativo del Instituto de Previsión Social de Misiones. No sustituye el
-          consejo médico profesional.
+          <strong>Aviso médico:</strong> GlucoControl IPS es apoyo informativo del Instituto
+          de Previsión Social de Misiones. Consulte siempre con su médico asignado antes de
+          cambiar medicación o alimentación.
         </p>
         <div className="mt-4 pt-4 border-t border-amber-200 flex justify-center">
           <IPSLogo size="sm" />

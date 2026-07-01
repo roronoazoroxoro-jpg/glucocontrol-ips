@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Heart, User } from "lucide-react";
+import { Heart, Stethoscope, User } from "lucide-react";
 import { IPSLogo } from "./IPSLogo";
+import { requestNotificationPermission } from "@/lib/reminders";
 
 interface OnboardingProps {
   onComplete: () => void;
@@ -10,6 +11,7 @@ interface OnboardingProps {
 
 export function Onboarding({ onComplete }: OnboardingProps) {
   const [name, setName] = useState("");
+  const [doctorName, setDoctorName] = useState("");
   const [diabetesType, setDiabetesType] = useState("tipo2");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -28,10 +30,16 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       const res = await fetch("/api/user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), diabetesType }),
+        body: JSON.stringify({
+          name: name.trim(),
+          diabetesType,
+          doctorName: doctorName.trim() || null,
+          notificationsEnabled: true,
+        }),
       });
 
       if (!res.ok) throw new Error("Error al guardar perfil");
+      await requestNotificationPermission();
       onComplete();
     } catch {
       setError("No se pudo guardar. Intenta de nuevo.");
@@ -75,6 +83,20 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition text-base"
               autoFocus
               autoComplete="name"
+            />
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
+              <Stethoscope className="w-4 h-4" />
+              Médico asignado (IPS)
+            </label>
+            <input
+              type="text"
+              value={doctorName}
+              onChange={(e) => setDoctorName(e.target.value)}
+              placeholder="Ej: Dr. García"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition text-base"
             />
           </div>
 

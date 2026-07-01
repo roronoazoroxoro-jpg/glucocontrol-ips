@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import type { StatsSummary } from "@/lib/stats";
-import { Activity, Target, Utensils, Wheat } from "lucide-react";
+import { Activity, Droplets, Flame, Target, Wheat, Zap } from "lucide-react";
 
 interface StatsCardsProps {
   stats: StatsSummary;
@@ -27,25 +27,41 @@ export function StatsCards({ stats }: StatsCardsProps) {
       bg: "bg-teal-50",
     },
     {
-      label: "Comidas registradas",
-      value: `${stats.totalMeals}`,
-      unit: "",
-      icon: Utensils,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
-    },
-    {
-      label: "Carbohidratos totales",
+      label: "Carbohidratos",
       value: `${stats.totalCarbs}`,
       unit: "g",
       icon: Wheat,
       color: "text-amber-600",
       bg: "bg-amber-50",
     },
+    {
+      label: "Azúcares",
+      value: `${stats.totalSugar}`,
+      unit: "g",
+      icon: Droplets,
+      color: "text-orange-600",
+      bg: "bg-orange-50",
+    },
+    {
+      label: "Grasas",
+      value: `${stats.totalFat}`,
+      unit: "g",
+      icon: Flame,
+      color: "text-red-600",
+      bg: "bg-red-50",
+    },
+    {
+      label: "Calorías",
+      value: `${stats.totalCalories}`,
+      unit: "kcal",
+      icon: Zap,
+      color: "text-violet-600",
+      bg: "bg-violet-50",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
       {cards.map((card) => (
         <div key={card.label} className="glass-card rounded-xl p-4">
           <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center mb-3", card.bg)}>

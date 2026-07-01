@@ -3,13 +3,17 @@ services:
     name: glucocontrol-ips
     runtime: node
     plan: free
+    region: ohio
     buildCommand: npm install && npx prisma generate && npx prisma db push && npm run build
     startCommand: npm start
+    healthCheckPath: /
     envVars:
       - key: NODE_VERSION
         value: "20"
       - key: DATABASE_URL
-        value: file:./prisma/prod.db
+        value: file:/opt/render/project/src/prisma/prod.db
+      - key: USDA_API_KEY
+        value: DEMO_KEY
     disk:
       name: glucocontrol-data
       mountPath: /opt/render/project/src/prisma
