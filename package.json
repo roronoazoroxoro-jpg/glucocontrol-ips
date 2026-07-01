@@ -11,6 +11,7 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
+    "setup:turso": "node scripts/provision-all.mjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {
