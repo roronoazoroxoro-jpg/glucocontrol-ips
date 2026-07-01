@@ -6,13 +6,18 @@ let initialized = false;
 
 export async function ensureProductionDatabase() {
   if (initialized) return;
-  if (process.env.TURSO_DATABASE_URL) {
+
+  const needsInit =
+    process.env.TURSO_DATABASE_URL ||
+    process.env.VERCEL ||
+    (process.env.DATABASE_URL ?? "").includes("/tmp");
+
+  if (!needsInit) {
     initialized = true;
     return;
   }
 
-  const dbUrl = process.env.DATABASE_URL ?? "";
-  if (!dbUrl.includes("/tmp")) {
+  if (process.env.TURSO_DATABASE_URL) {
     initialized = true;
     return;
   }
