@@ -3,14 +3,20 @@ import { prisma, withDbTimeout } from "@/lib/db";
 import { dbErrorResponse } from "@/lib/api-error";
 import { ensureProductionDatabase } from "@/lib/init-db";
 import { DEFAULT_REMINDERS } from "@/lib/reminders";
+import {
+  getSessionUser,
+  sanitizeUser,
+  unauthorizedResponse,
+} from "@/lib/auth";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
     await ensureProductionDatabase();
-    const user = await withDbTimeout(prisma.user.findFirst());
-    return NextResponse.json({ user });
+    const user = await getSessionUser();
+    if (!user) return unauthorizedResponse();
+    return NextResponse.json({ user: sanitizeUser(user) });
   } catch (error) {
     return dbErrorResponse("api/user GET", error);
   }
@@ -19,99 +25,74 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     await ensureProductionDatabase();
+    const sessionUser = await getSessionUser();
+    if (!sessionUser) return unauthorizedResponse();
+
     const body = await request.json();
-  const {
-    name,
-    diabetesType,
-    targetMin,
-    targetMax,
-    doctorName,
-    medications,
-    mealTimes,
-    glucoseIntervalHours,
-    notificationsEnabled,
-  } = body;
+    const {
+      name,
+      diabetesType,
+      targetMin,
+      targetMax,
+      doctorName,
+      medications,
+      mealTimes,
+      glucoseIntervalHours,
+      notificationsEnabled,
+    } = body;
 
-  if (!name?.trim()) {
-    return NextResponse.json({ error: "El nombre es requerido" }, { status: 400 });
-  }
+    if (!name?.trim()) {
+      return NextResponse.json({ error: "El nombre es requerido" }, { status: 400 });
+    }
 
-  const existing = await prisma.user.findFirst();
-
-  const data = {
-    name: name.trim(),
-    diabetesType: diabetesType ?? "tipo2",
-    targetMin: targetMin ?? 70,
-    targetMax: targetMax ?? 140,
-    doctorName: doctorName?.trim() || null,
-    medications: medications ? JSON.stringify(medications) : undefined,
-    mealTimes: mealTimes ? JSON.stringify(mealTimes) : undefined,
-    glucoseIntervalHours: glucoseIntervalHours ?? 4,
-    notificationsEnabled: notificationsEnabled ?? true,
-  };
-
-  const user = existing
-    ? await prisma.user.update({ where: { id: existing.id }, data })
-    : await prisma.user.create({
+    const user = await withDbTimeout(
+      prisma.user.update({
+        where: { id: sessionUser.id },
         data: {
-          ...data,
-          mealTimes: JSON.stringify(mealTimes ?? DEFAULT_REMINDERS.mealTimes),
-          medications: JSON.stringify(medications ?? []),
+          name: name.trim(),
+          diabetesType: diabetesType ?? "tipo2",
+          targetMin: targetMin ?? 70,
+          targetMax: targetMax ?? 140,
+          doctorName: doctorName?.trim() || null,
+          medications: medications ? JSON.stringify(medications) : undefined,
+          mealTimes: mealTimes ? JSON.stringify(mealTimes) : undefined,
+          glucoseIntervalHours: glucoseIntervalHours ?? 4,
+          notificationsEnabled: notificationsEnabled ?? true,
+          profileComplete: true,
         },
-      });
+      })
+    );
 
-  if (!existing) {
-    const now = Date.now();
-    await prisma.glucoseReading.createMany({
-      data: [
-        { value: 118, source: "manual", createdAt: new Date(now - 3600000 * 2) },
-        { value: 132, source: "manual", createdAt: new Date(now - 3600000) },
-        { value: 105, source: "manual", createdAt: new Date(now - 1800000) },
-      ],
-    });
-    await prisma.mealEntry.createMany({
-      data: [
-        {
-          name: "Avena con frutas",
-          type: "desayuno",
-          carbs: 40,
-          sugar: 18,
-          fat: 4,
-          protein: 7,
-          calories: 220,
-          autoAnalyzed: true,
-          nutritionSource: "local",
-          createdAt: new Date(now - 3600000 * 3),
-        },
-        {
-          name: "Agua",
-          type: "bebida",
-          carbs: 0,
-          sugar: 0,
-          fat: 0,
-          calories: 0,
-          autoAnalyzed: true,
-          nutritionSource: "local",
-          createdAt: new Date(now - 3600000 * 2),
-        },
-        {
-          name: "Ensalada con pollo",
-          type: "comida",
-          carbs: 10,
-          sugar: 5,
-          fat: 12,
-          protein: 28,
-          calories: 250,
-          autoAnalyzed: true,
-          nutritionSource: "local",
-          createdAt: new Date(now - 3600000),
-        },
-      ],
-    });
-  }
-
-  return NextResponse.json({ user });
+    return NextResponse.json({ user: sanitizeUser(user) });
   } catch (error) {
     return dbErrorResponse("api/user POST", error);
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const sessionUser = await getSessionUser();
+    if (!sessionUser) return unauthorizedResponse();
+
+    const body = await request.json();
+    const data: Record<string, unknown> = {};
+
+    if (body.name?.trim()) data.name = body.name.trim();
+    if (body.diabetesType) data.diabetesType = body.diabetesType;
+    if (body.targetMin != null) data.targetMin = body.targetMin;
+    if (body.targetMax != null) data.targetMax = body.targetMax;
+    if (body.doctorName !== undefined) data.doctorName = body.doctorName?.trim() || null;
+    if (body.medications) data.medications = JSON.stringify(body.medications);
+    if (body.mealTimes) data.mealTimes = JSON.stringify(body.mealTimes);
+    if (body.glucoseIntervalHours != null) data.glucoseIntervalHours = body.glucoseIntervalHours;
+    if (body.notificationsEnabled != null) data.notificationsEnabled = body.notificationsEnabled;
+
+    const user = await withDbTimeout(
+      prisma.user.update({ where: { id: sessionUser.id }, data })
+    );
+
+    return NextResponse.json({ user: sanitizeUser(user) });
+  } catch (error) {
+    return dbErrorResponse("api/user PATCH", error);
   }
 }

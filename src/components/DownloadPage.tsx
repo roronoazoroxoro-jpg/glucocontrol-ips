@@ -106,6 +106,21 @@ export function DownloadPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+            <Link
+              href="/registro"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-white text-emerald-700 font-semibold shadow-lg hover:bg-emerald-50 transition touch-manipulation"
+            >
+              Crear cuenta gratis
+              <ChevronRight className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-emerald-500/30 text-white border border-white/30 font-semibold hover:bg-emerald-500/40 transition touch-manipulation"
+            >
+              Ya tengo cuenta
+            </Link>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
             {isStandalone ? (
               <Link
                 href="/app"
@@ -258,14 +273,30 @@ export function DownloadPage() {
       </section>
 
       {/* Footer CTA */}
-      <footer className="max-w-4xl mx-auto px-4 py-10 text-center">
-        <Link
-          href="/app"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold shadow-md touch-manipulation"
-        >
-          Entrar a GlucoControl IPS
-          <ChevronRight className="w-5 h-5" />
-        </Link>
+      <footer className="max-w-4xl mx-auto px-4 py-10 text-center border-t border-slate-200/60">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
+          <Link
+            href="/registro"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold shadow-md touch-manipulation"
+          >
+            Crear cuenta
+            <ChevronRight className="w-5 h-5" />
+          </Link>
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-emerald-300 text-emerald-700 font-semibold touch-manipulation"
+          >
+            Iniciar sesión
+          </Link>
+        </div>
+        <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs mb-4">
+          <Link href="/privacidad" className="text-emerald-700 hover:underline">
+            Privacidad
+          </Link>
+          <Link href="/terminos" className="text-emerald-700 hover:underline">
+            Términos
+          </Link>
+        </nav>
         <p className="text-xs text-slate-400 mt-6 max-w-md mx-auto leading-relaxed">
           Herramienta de apoyo informativo del IPS Misiones. No reemplaza la consulta
           médica profesional. Consulte siempre a su médico de cabecera.

@@ -9,6 +9,8 @@ datasource db {
 
 model User {
   id                     String   @id @default(cuid())
+  email                  String   @unique
+  passwordHash           String
   name                   String
   diabetesType           String   @default("tipo2")
   targetMin              Int      @default(70)
@@ -18,42 +20,60 @@ model User {
   mealTimes              String?
   glucoseIntervalHours   Int      @default(4)
   notificationsEnabled   Boolean  @default(true)
+  profileComplete        Boolean  @default(false)
+  acceptedTermsAt        DateTime?
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
+
+  glucoseReadings GlucoseReading[]
+  meals           MealEntry[]
+  chatMessages    ChatMessage[]
 }
 
 model GlucoseReading {
   id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   value     Int
   notes     String?
   source    String   @default("manual")
   createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model MealEntry {
-  id             String   @id @default(cuid())
-  name           String
-  type           String   @default("comida")
-  carbs          Float    @default(0)
-  sugar          Float?
-  fat            Float?
-  saturatedFat   Float?
-  protein        Float?
-  fiber          Float?
-  sodium         Float?
-  calories       Float?
-  servingSize    String?
-  autoAnalyzed   Boolean  @default(true)
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  type            String   @default("comida")
+  carbs           Float    @default(0)
+  sugar           Float?
+  fat             Float?
+  saturatedFat    Float?
+  protein         Float?
+  fiber           Float?
+  sodium          Float?
+  calories        Float?
+  servingSize     String?
+  autoAnalyzed    Boolean  @default(true)
   nutritionSource String?
-  notes          String?
-  createdAt      DateTime @default(now())
+  notes           String?
+  createdAt       DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model ChatMessage {
   id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   role      String
   content   String
   createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model NutritionCache {

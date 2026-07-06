@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Activity, Download, LayoutDashboard, MessageSquare, RefreshCw, Settings } from "lucide-react";
+import { Activity, Download, FileText, LayoutDashboard, LogOut, MessageSquare, RefreshCw, Settings } from "lucide-react";
 import { IPSLogo } from "./IPSLogo";
 import { Onboarding } from "./Onboarding";
 import { GlucoseCard } from "./GlucoseCard";
@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 
 interface User {
   id: string;
+  email?: string;
   name: string;
   diabetesType: string;
   targetMin: number;
@@ -31,6 +32,7 @@ interface User {
   mealTimes?: string | null;
   glucoseIntervalHours?: number;
   notificationsEnabled?: boolean;
+  profileComplete?: boolean;
 }
 
 interface DashboardData {
@@ -72,6 +74,10 @@ export function DashboardApp() {
       clearTimeout(timeout);
 
       const d = await res.json();
+      if (res.status === 401) {
+        window.location.href = "/login?next=/app";
+        return;
+      }
       if (!res.ok) {
         throw new Error(d.error ?? "No se pudo conectar con el servidor");
       }
@@ -134,8 +140,8 @@ export function DashboardApp() {
     );
   }
 
-  if (!user) {
-    return <Onboarding onComplete={fetchUser} />;
+  if (!user || !user.profileComplete) {
+    return <Onboarding onComplete={fetchUser} initialName={user?.name} />;
   }
 
   const tabs: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
@@ -333,7 +339,38 @@ function ProfilePanel({
   return (
     <div className="space-y-4 max-w-lg">
       <div className="glass-card rounded-2xl p-6">
-        <h3 className="font-semibold text-slate-800 mb-4">Mi perfil</h3>
+        <h3 className="font-semibold text-slate-800 mb-4">Mi cuenta</h3>
+        {user.email && (
+          <p className="text-sm text-slate-500 mb-4">
+            Sesión: <span className="text-slate-700">{user.email}</span>
+          </p>
+        )}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <a
+            href="/api/export?format=html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl border border-emerald-300 text-emerald-700 text-sm font-medium hover:bg-emerald-50 transition touch-manipulation"
+          >
+            <FileText className="w-4 h-4" />
+            Exportar informe
+          </a>
+          <button
+            type="button"
+            onClick={async () => {
+              await fetch("/api/auth/logout", { method: "POST" });
+              window.location.href = "/login";
+            }}
+            className="inline-flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition touch-manipulation"
+          >
+            <LogOut className="w-4 h-4" />
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+
+      <div className="glass-card rounded-2xl p-6">
+        <h3 className="font-semibold text-slate-800 mb-4">Mi perfil de salud</h3>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
             <label className="text-sm text-slate-600 mb-1 block">Nombre</label>

@@ -1,20 +1,31 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, withDbTimeout } from "@/lib/db";
+import { dbErrorResponse } from "@/lib/api-error";
 import { getReminderSettings } from "@/lib/reminders";
+import { getSessionUser, unauthorizedResponse } from "@/lib/auth";
+
+export const runtime = "nodejs";
 
 export async function GET() {
-  const user = await prisma.user.findFirst();
-  if (!user) return NextResponse.json({ reminders: null });
+  try {
+    const user = await getSessionUser();
+    if (!user) return unauthorizedResponse();
 
-  const lastGlucose = await prisma.glucoseReading.findFirst({
-    orderBy: { createdAt: "desc" },
-  });
+    const lastGlucose = await withDbTimeout(
+      prisma.glucoseReading.findFirst({
+        where: { userId: user.id },
+        orderBy: { createdAt: "desc" },
+      })
+    );
 
-  const settings = getReminderSettings(user);
+    const settings = getReminderSettings(user);
 
-  return NextResponse.json({
-    settings,
-    doctorName: user.doctorName,
-    lastGlucoseAt: lastGlucose?.createdAt ?? null,
-  });
+    return NextResponse.json({
+      settings,
+      doctorName: user.doctorName,
+      lastGlucoseAt: lastGlucose?.createdAt ?? null,
+    });
+  } catch (error) {
+    return dbErrorResponse("api/reminders", error);
+  }
 }

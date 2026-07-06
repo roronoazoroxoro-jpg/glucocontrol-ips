@@ -7,10 +7,11 @@ import { requestNotificationPermission } from "@/lib/reminders";
 
 interface OnboardingProps {
   onComplete: () => void;
+  initialName?: string;
 }
 
-export function Onboarding({ onComplete }: OnboardingProps) {
-  const [name, setName] = useState("");
+export function Onboarding({ onComplete, initialName }: OnboardingProps) {
+  const [name, setName] = useState(initialName ?? "");
   const [doctorName, setDoctorName] = useState("");
   const [diabetesType, setDiabetesType] = useState("tipo2");
   const [loading, setLoading] = useState(false);
@@ -62,9 +63,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         </div>
 
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-slate-800 mb-2">Bienvenido/a</h2>
+          <h2 className="text-lg font-semibold text-slate-800 mb-2">Configurá tu perfil de salud</h2>
           <p className="text-slate-600 text-sm leading-relaxed">
-            Configura tu perfil para que la IA te hable por tu nombre y te dé
+            Completá estos datos para que la IA te hable por tu nombre y te dé
             recomendaciones personalizadas según tu glucosa.
           </p>
         </div>

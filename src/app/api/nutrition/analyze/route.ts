@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { analyzeNutrition } from "@/lib/nutrition";
+import { getSessionUser, unauthorizedResponse } from "@/lib/auth";
+
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const user = await getSessionUser();
+  if (!user) return unauthorizedResponse();
+
   const body = await request.json();
   const { name, type } = body;
 

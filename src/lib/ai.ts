@@ -38,12 +38,14 @@ function getOpenAIClient() {
   return new OpenAI({ apiKey });
 }
 
-async function getUserContext() {
-  const user = await prisma.user.findFirst();
+async function getUserContext(userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
   const latestGlucose = await prisma.glucoseReading.findFirst({
+    where: { userId },
     orderBy: { createdAt: "desc" },
   });
   const recentMeals = await prisma.mealEntry.findMany({
+    where: { userId },
     orderBy: { createdAt: "desc" },
     take: 5,
   });
@@ -148,8 +150,8 @@ function fallbackResponse(
   return `${buildRecommendationSummary(ctx)}\n\n${MEDICAL_FOOTER}`;
 }
 
-export async function generateChatResponse(userMessage: string): Promise<string> {
-  const { user, latestGlucose, recentMeals } = await getUserContext();
+export async function generateChatResponse(userMessage: string, userId: string): Promise<string> {
+  const { user, latestGlucose, recentMeals } = await getUserContext(userId);
   const userName = user?.name ?? "Usuario";
   const glucose = latestGlucose?.value ?? null;
   const doctorName = user?.doctorName ?? null;
@@ -201,8 +203,8 @@ export async function generateChatResponse(userMessage: string): Promise<string>
   }
 }
 
-export async function generateVoiceGreeting(): Promise<string> {
-  const { user, latestGlucose, recentMeals } = await getUserContext();
+export async function generateVoiceGreeting(userId: string): Promise<string> {
+  const { user, latestGlucose, recentMeals } = await getUserContext(userId);
   const userName = user?.name ?? "Usuario";
   const doctorName = user?.doctorName;
   const medications = parseMedications(user?.medications);

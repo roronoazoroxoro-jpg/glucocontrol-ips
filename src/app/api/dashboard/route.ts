@@ -3,51 +3,49 @@ import { prisma, withDbTimeout } from "@/lib/db";
 import { dbErrorResponse } from "@/lib/api-error";
 import { analyzeGlucose } from "@/lib/recommendations";
 import { computeStats, getPeriodRange, type Period } from "@/lib/stats";
+import { getSessionUser, unauthorizedResponse } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   try {
+    const user = await getSessionUser();
+    if (!user) return unauthorizedResponse();
+
     const { searchParams } = new URL(request.url);
     const period = (searchParams.get("period") ?? "day") as Period;
-
-    const user = await withDbTimeout(prisma.user.findFirst());
     const { start, end } = getPeriodRange(period);
 
     const readings = await withDbTimeout(
       prisma.glucoseReading.findMany({
-        where: { createdAt: { gte: start, lte: end } },
+        where: { userId: user.id, createdAt: { gte: start, lte: end } },
         orderBy: { createdAt: "asc" },
       })
     );
 
     const meals = await withDbTimeout(
       prisma.mealEntry.findMany({
-        where: { createdAt: { gte: start, lte: end } },
+        where: { userId: user.id, createdAt: { gte: start, lte: end } },
         orderBy: { createdAt: "desc" },
       })
     );
 
     const latest = await withDbTimeout(
       prisma.glucoseReading.findFirst({
+        where: { userId: user.id },
         orderBy: { createdAt: "desc" },
       })
     );
 
-    const stats = computeStats(
-      readings,
-      meals,
-      user?.targetMin ?? 70,
-      user?.targetMax ?? 140
-    );
+    const stats = computeStats(readings, meals, user.targetMin, user.targetMax);
 
     const recommendation = latest
       ? analyzeGlucose({
           glucose: latest.value,
-          userName: user?.name ?? "Usuario",
-          diabetesType: user?.diabetesType ?? "tipo2",
-          targetMin: user?.targetMin ?? 70,
-          targetMax: user?.targetMax ?? 140,
+          userName: user.name,
+          diabetesType: user.diabetesType,
+          targetMin: user.targetMin,
+          targetMax: user.targetMax,
           recentMeals: meals.slice(0, 3).map((m) => ({ name: m.name, carbs: m.carbs })),
         })
       : null;

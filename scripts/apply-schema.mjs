@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+/**
+ * Aplica schema v3 completo en Turso (recrea tablas).
+ * Uso: node scripts/apply-schema.mjs
+ */
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
@@ -20,13 +24,23 @@ const url = process.env.TURSO_DATABASE_URL;
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
 if (!url || !authToken) {
-  console.error("Faltan TURSO_DATABASE_URL y TURSO_AUTH_TOKEN");
+  console.error("Faltan TURSO_DATABASE_URL y TURSO_AUTH_TOKEN (.env.turso o entorno)");
   process.exit(1);
 }
 
+const DROP_SQL = `
+DROP TABLE IF EXISTS "ChatMessage";
+DROP TABLE IF EXISTS "MealEntry";
+DROP TABLE IF EXISTS "GlucoseReading";
+DROP TABLE IF EXISTS "NutritionCache";
+DROP TABLE IF EXISTS "User";
+`;
+
 const SCHEMA_SQL = `
-CREATE TABLE IF NOT EXISTS "User" (
+CREATE TABLE "User" (
     "id" TEXT NOT NULL PRIMARY KEY,
+    "email" TEXT NOT NULL,
+    "passwordHash" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "diabetesType" TEXT NOT NULL DEFAULT 'tipo2',
     "targetMin" INTEGER NOT NULL DEFAULT 70,
@@ -36,18 +50,25 @@ CREATE TABLE IF NOT EXISTS "User" (
     "mealTimes" TEXT,
     "glucoseIntervalHours" INTEGER NOT NULL DEFAULT 4,
     "notificationsEnabled" BOOLEAN NOT NULL DEFAULT true,
+    "profileComplete" BOOLEAN NOT NULL DEFAULT false,
+    "acceptedTermsAt" DATETIME,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
-CREATE TABLE IF NOT EXISTS "GlucoseReading" (
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE TABLE "GlucoseReading" (
     "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
     "value" INTEGER NOT NULL,
     "notes" TEXT,
     "source" TEXT NOT NULL DEFAULT 'manual',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE
 );
-CREATE TABLE IF NOT EXISTS "MealEntry" (
+CREATE INDEX "GlucoseReading_userId_createdAt_idx" ON "GlucoseReading"("userId", "createdAt");
+CREATE TABLE "MealEntry" (
     "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "type" TEXT NOT NULL DEFAULT 'comida',
     "carbs" REAL NOT NULL DEFAULT 0,
@@ -62,32 +83,40 @@ CREATE TABLE IF NOT EXISTS "MealEntry" (
     "autoAnalyzed" BOOLEAN NOT NULL DEFAULT true,
     "nutritionSource" TEXT,
     "notes" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE
 );
-CREATE TABLE IF NOT EXISTS "ChatMessage" (
+CREATE INDEX "MealEntry_userId_createdAt_idx" ON "MealEntry"("userId", "createdAt");
+CREATE TABLE "ChatMessage" (
     "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
     "role" TEXT NOT NULL,
     "content" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE
 );
-CREATE TABLE IF NOT EXISTS "NutritionCache" (
+CREATE INDEX "ChatMessage_userId_createdAt_idx" ON "ChatMessage"("userId", "createdAt");
+CREATE TABLE "NutritionCache" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "query" TEXT NOT NULL,
     "result" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE UNIQUE INDEX IF NOT EXISTS "NutritionCache_query_key" ON "NutritionCache"("query");
+CREATE UNIQUE INDEX "NutritionCache_query_key" ON "NutritionCache"("query");
 `;
 
 const client = createClient({ url, authToken });
 
+console.log("Eliminando tablas anteriores...");
+for (const stmt of DROP_SQL.split(";").map((s) => s.trim()).filter(Boolean)) {
+  await client.execute(stmt);
+}
+
+console.log("Creando schema v3...");
 for (const stmt of SCHEMA_SQL.split(";").map((s) => s.trim()).filter(Boolean)) {
   await client.execute(stmt);
   console.log("OK:", stmt.split("\n")[0]);
 }
 
-const tables = await client.execute(
-  "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-);
-console.log("\nTablas:", tables.rows.map((r) => r.name).join(", "));
 client.close();
+console.log("\nSchema v3 aplicado en Turso.");

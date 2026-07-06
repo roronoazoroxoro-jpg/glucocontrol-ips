@@ -2,13 +2,18 @@ import { NextResponse } from "next/server";
 import { prisma, withDbTimeout } from "@/lib/db";
 import { dbErrorResponse } from "@/lib/api-error";
 import { generateChatResponse } from "@/lib/ai";
+import { getSessionUser, unauthorizedResponse } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
+    const user = await getSessionUser();
+    if (!user) return unauthorizedResponse();
+
     const messages = await withDbTimeout(
       prisma.chatMessage.findMany({
+        where: { userId: user.id },
         orderBy: { createdAt: "asc" },
         take: 100,
       })
@@ -21,6 +26,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const user = await getSessionUser();
+    if (!user) return unauthorizedResponse();
+
     const body = await request.json();
     const { message } = body;
 
@@ -30,15 +38,15 @@ export async function POST(request: Request) {
 
     await withDbTimeout(
       prisma.chatMessage.create({
-        data: { role: "user", content: message.trim() },
+        data: { userId: user.id, role: "user", content: message.trim() },
       })
     );
 
-    const response = await generateChatResponse(message.trim());
+    const response = await generateChatResponse(message.trim(), user.id);
 
     const assistantMessage = await withDbTimeout(
       prisma.chatMessage.create({
-        data: { role: "assistant", content: response },
+        data: { userId: user.id, role: "assistant", content: response },
       })
     );
 
