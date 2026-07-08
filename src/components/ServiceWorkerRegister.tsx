@@ -4,9 +4,23 @@ import { useEffect } from "react";
 
 export function ServiceWorkerRegister() {
   useEffect(() => {
-    if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    if (!("serviceWorker" in navigator) || process.env.NODE_ENV !== "production") {
+      return;
     }
+
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (reloaded) return;
+      reloaded = true;
+      window.location.reload();
+    });
+
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => {
+        registration.update();
+      })
+      .catch(() => {});
   }, []);
 
   return null;
