@@ -62,7 +62,7 @@ export function DownloadPage() {
     {
       icon: Camera,
       title: "Foto de tu comida",
-      desc: "Sacá una foto del plato y la IA detecta los alimentos y calcula calorías, carbohidratos e impacto en tu glucosa.",
+      desc: "Sacá una foto del plato y la app detecta los alimentos y calcula calorías, carbohidratos e impacto en tu glucosa. Funciona en tu propio celular.",
     },
     {
       icon: Activity,

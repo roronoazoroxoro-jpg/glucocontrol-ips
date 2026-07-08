@@ -36,23 +36,77 @@ Reglas:
 - Si NO hay comida en la foto (por ejemplo una persona, un objeto, o algo borroso), devolvé {"detected": false} y nada más.
 - Respondé en español rioplatense, sencillo y humano.`;
 
-export async function analyzeFoodPhoto(imageDataUrl: string): Promise<
+type VisionResult =
   | { ok: true; result: FoodPhotoResult }
-  | { ok: false; reason: "no_key" | "no_food" | "error"; message: string }
-> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
+  | { ok: false; reason: "no_key" | "no_food" | "error"; message: string };
+
+export async function analyzeFoodPhoto(imageDataUrl: string): Promise<VisionResult> {
+  const hasOpenAI = !!process.env.OPENAI_API_KEY;
+  const hasGemini = !!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
+
+  if (!hasOpenAI && !hasGemini) {
     return {
       ok: false,
       reason: "no_key",
       message:
-        "El análisis por foto necesita la clave de IA (OPENAI_API_KEY). Mientras tanto podés escribir qué comiste y se calcula igual.",
+        "El servidor no tiene una clave de IA de visión. Se usará el análisis en tu propio celular.",
     };
   }
 
+  // Prioridad: OpenAI (si está) → Gemini (gratis)
+  if (hasOpenAI) {
+    const r = await analyzeWithOpenAIVision(imageDataUrl);
+    if (r.ok || r.reason === "no_food") return r;
+  }
+  if (hasGemini) {
+    const r = await analyzeWithGeminiVision(imageDataUrl);
+    return r;
+  }
+
+  return { ok: false, reason: "error", message: "No se pudo analizar la foto." };
+}
+
+function buildResult(p: Record<string, unknown>, source: NutritionAnalysis["source"]): VisionResult {
+  if (p.detected === false) {
+    return {
+      ok: false,
+      reason: "no_food",
+      message: "No detectamos comida en la foto. Probá con una foto más clara del plato.",
+    };
+  }
+
+  const name = (p.name as string) ?? "Plato analizado";
+  const nutrition: NutritionAnalysis = {
+    name,
+    servingSize: (p.servingSize as string) ?? "1 porción",
+    calories: Math.round((p.calories as number) ?? 0),
+    carbs: round1(p.carbs),
+    sugar: round1(p.sugar),
+    fat: round1(p.fat),
+    saturatedFat: round1(p.saturatedFat),
+    protein: round1(p.protein),
+    fiber: round1(p.fiber),
+    sodium: Math.round((p.sodium as number) ?? 0),
+    source,
+    confidence: "medium",
+  };
+
+  return {
+    ok: true,
+    result: {
+      name,
+      items: Array.isArray(p.items) ? (p.items as string[]) : [],
+      nutrition,
+      glucoseNote: (p.glucoseNote as string) ?? "",
+      healthTip: (p.healthTip as string) ?? "",
+    },
+  };
+}
+
+async function analyzeWithOpenAIVision(imageDataUrl: string): Promise<VisionResult> {
   try {
     const OpenAI = (await import("openai")).default;
-    const openai = new OpenAI({ apiKey });
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const completion = await openai.chat.completions.create({
       model: VISION_MODEL,
@@ -72,50 +126,47 @@ export async function analyzeFoodPhoto(imageDataUrl: string): Promise<
     });
 
     const raw = completion.choices[0]?.message?.content;
-    if (!raw) {
-      return { ok: false, reason: "error", message: "No se pudo analizar la foto." };
-    }
-
-    const p = JSON.parse(raw);
-    if (p.detected === false) {
-      return {
-        ok: false,
-        reason: "no_food",
-        message: "No detectamos comida en la foto. Probá con una foto más clara del plato.",
-      };
-    }
-
-    const nutrition: NutritionAnalysis = {
-      name: p.name ?? "Plato analizado",
-      servingSize: p.servingSize ?? "1 porción",
-      calories: Math.round(p.calories ?? 0),
-      carbs: round1(p.carbs),
-      sugar: round1(p.sugar),
-      fat: round1(p.fat),
-      saturatedFat: round1(p.saturatedFat),
-      protein: round1(p.protein),
-      fiber: round1(p.fiber),
-      sodium: Math.round(p.sodium ?? 0),
-      source: "openai",
-      confidence: "medium",
-    };
-
-    return {
-      ok: true,
-      result: {
-        name: p.name ?? "Plato analizado",
-        items: Array.isArray(p.items) ? p.items : [],
-        nutrition,
-        glucoseNote: p.glucoseNote ?? "",
-        healthTip: p.healthTip ?? "",
-      },
-    };
+    if (!raw) return { ok: false, reason: "error", message: "No se pudo analizar la foto." };
+    return buildResult(JSON.parse(raw), "openai");
   } catch {
-    return {
-      ok: false,
-      reason: "error",
-      message: "Hubo un problema al analizar la foto. Intentá de nuevo en un momento.",
-    };
+    return { ok: false, reason: "error", message: "Hubo un problema al analizar la foto." };
+  }
+}
+
+async function analyzeWithGeminiVision(imageDataUrl: string): Promise<VisionResult> {
+  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  try {
+    const match = imageDataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
+    if (!match) return { ok: false, reason: "error", message: "Imagen inválida." };
+    const [, mimeType, base64] = match;
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents: [
+            {
+              parts: [
+                { text: "Analizá esta foto de comida y devolvé solo el JSON." },
+                { inline_data: { mime_type: mimeType, data: base64 } },
+              ],
+            },
+          ],
+          generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
+        }),
+      }
+    );
+
+    if (!res.ok) return { ok: false, reason: "error", message: "No se pudo analizar la foto." };
+    const data = await res.json();
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!raw) return { ok: false, reason: "error", message: "No se pudo analizar la foto." };
+    return buildResult(JSON.parse(raw), "openai");
+  } catch {
+    return { ok: false, reason: "error", message: "Hubo un problema al analizar la foto." };
   }
 }
 

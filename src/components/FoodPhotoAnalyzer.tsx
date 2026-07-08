@@ -11,6 +11,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import type { NutritionAnalysis } from "@/lib/nutrition";
+import { classifyFoodImage } from "@/lib/food-vision-client";
 
 interface FoodPhotoResult {
   name: string;
@@ -18,6 +19,25 @@ interface FoodPhotoResult {
   nutrition: NutritionAnalysis;
   glucoseNote: string;
   healthTip: string;
+  onDevice?: boolean;
+}
+
+function buildNotes(n: NutritionAnalysis): { glucoseNote: string; healthTip: string } {
+  const carbs = n.carbs ?? 0;
+  const sugar = n.sugar ?? 0;
+  let impacto: string;
+  if (carbs >= 45 || sugar >= 20) {
+    impacto = "Impacto ALTO en la glucosa: tiene bastantes carbohidratos/azúcares. Controlá la porción y medí tu glucosa después.";
+  } else if (carbs >= 20 || sugar >= 8) {
+    impacto = "Impacto MEDIO en la glucosa por sus carbohidratos. Acompañalo con proteína o fibra para amortiguar la subida.";
+  } else {
+    impacto = "Impacto BAJO en la glucosa: pocos carbohidratos. Buena opción para mantener niveles estables.";
+  }
+  const tip =
+    n.fiber >= 4
+      ? "Buena cantidad de fibra: ayuda a que la glucosa suba más lento."
+      : "Sumá una porción de verduras o fibra para equilibrar el plato.";
+  return { glucoseNote: impacto, healthTip: tip };
 }
 
 interface FoodPhotoAnalyzerProps {
@@ -63,6 +83,7 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
   const galleryRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [analyzingMsg, setAnalyzingMsg] = useState("Analizando tu plato...");
   const [result, setResult] = useState<FoodPhotoResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -84,6 +105,7 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
     setResult(null);
     setSaved(false);
     setAnalyzing(true);
+    setAnalyzingMsg("Analizando tu plato...");
 
     try {
       const compressed = await compressImage(file);
@@ -96,16 +118,56 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
       });
       const data = await res.json();
 
-      if (!res.ok || data.error) {
-        setError(data.error ?? "No se pudo analizar la foto.");
+      if (res.ok && data.result) {
+        setResult(data.result as FoodPhotoResult);
         return;
       }
-      setResult(data.result as FoodPhotoResult);
+
+      // Sin clave de IA en el servidor → análisis en el propio celular.
+      if (data.reason === "no_key") {
+        await analyzeOnDevice(compressed);
+        return;
+      }
+
+      setError(data.error ?? "No se pudo analizar la foto.");
     } catch {
       setError("No se pudo procesar la imagen. Intentá de nuevo.");
     } finally {
       setAnalyzing(false);
     }
+  }
+
+  async function analyzeOnDevice(imageDataUrl: string) {
+    setAnalyzingMsg("Analizando en tu celular (la primera vez puede tardar unos segundos)...");
+    const detection = await classifyFoodImage(imageDataUrl);
+    if (!detection) {
+      setError(
+        "No pudimos reconocer la comida en tu celular. Probá con una foto más clara o escribí qué comiste en la pestaña “Escribir”."
+      );
+      return;
+    }
+
+    const res = await fetch("/api/nutrition/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: detection.query, type: mealType }),
+    });
+    const data = await res.json();
+    const nutrition: NutritionAnalysis | undefined = data.nutrition;
+    if (!nutrition) {
+      setError("No pudimos calcular los nutrientes. Intentá de nuevo.");
+      return;
+    }
+
+    const notes = buildNotes(nutrition);
+    setResult({
+      name: detection.label,
+      items: detection.items,
+      nutrition,
+      glucoseNote: notes.glucoseNote,
+      healthTip: notes.healthTip,
+      onDevice: true,
+    });
   }
 
   async function saveMeal() {
@@ -188,9 +250,9 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
             unoptimized
           />
           {analyzing && (
-            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2 text-white">
+            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2 text-white px-4 text-center">
               <Loader2 className="w-8 h-8 animate-spin" />
-              <span className="text-sm font-medium">Analizando tu plato...</span>
+              <span className="text-sm font-medium">{analyzingMsg}</span>
             </div>
           )}
           {!analyzing && (
@@ -258,7 +320,9 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
           )}
 
           <p className="text-[10px] text-emerald-600/70">
-            Estimación por IA a partir de la foto. Puede variar según la porción real.
+            {result.onDevice
+              ? "Reconocido en tu celular. Estimación aproximada según la porción."
+              : "Estimación por IA a partir de la foto. Puede variar según la porción real."}
           </p>
 
           <button
