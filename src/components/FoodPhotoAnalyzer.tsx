@@ -123,8 +123,8 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
         return;
       }
 
-      // Sin clave de IA en el servidor → análisis en el propio celular.
-      if (data.reason === "no_key") {
+      // Sin clave o error de la IA del servidor → análisis en el propio celular.
+      if (data.reason === "no_key" || data.reason === "error") {
         await analyzeOnDevice(compressed);
         return;
       }

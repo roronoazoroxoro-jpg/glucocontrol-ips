@@ -133,41 +133,56 @@ async function analyzeWithOpenAIVision(imageDataUrl: string): Promise<VisionResu
   }
 }
 
+const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"];
+
 async function analyzeWithGeminiVision(imageDataUrl: string): Promise<VisionResult> {
   const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  try {
-    const match = imageDataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
-    if (!match) return { ok: false, reason: "error", message: "Imagen inválida." };
-    const [, mimeType, base64] = match;
+  const match = imageDataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
+  if (!match) return { ok: false, reason: "error", message: "Imagen inválida." };
+  const [, mimeType, base64] = match;
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+  const body = JSON.stringify({
+    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents: [
       {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: [
-            {
-              parts: [
-                { text: "Analizá esta foto de comida y devolvé solo el JSON." },
-                { inline_data: { mime_type: mimeType, data: base64 } },
-              ],
-            },
-          ],
-          generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
-        }),
-      }
-    );
+        parts: [
+          { text: "Analizá esta foto de comida y devolvé solo el JSON." },
+          { inline_data: { mime_type: mimeType, data: base64 } },
+        ],
+      },
+    ],
+    generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
+  });
 
-    if (!res.ok) return { ok: false, reason: "error", message: "No se pudo analizar la foto." };
-    const data = await res.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!raw) return { ok: false, reason: "error", message: "No se pudo analizar la foto." };
-    return buildResult(JSON.parse(raw), "openai");
-  } catch {
-    return { ok: false, reason: "error", message: "Hubo un problema al analizar la foto." };
+  for (const model of GEMINI_MODELS) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+        }
+      );
+
+      // Modelo no disponible → probar el siguiente
+      if (res.status === 404) continue;
+      if (!res.ok) continue;
+
+      const data = await res.json();
+      const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!raw) continue;
+      return buildResult(JSON.parse(raw), "openai");
+    } catch {
+      continue;
+    }
   }
+
+  return {
+    ok: false,
+    reason: "error",
+    message: "No se pudo analizar la foto con la IA. Se usará el análisis en tu celular.",
+  };
 }
 
 function round1(v: unknown): number {
