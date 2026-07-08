@@ -56,7 +56,46 @@ const FOOD_MAP: FoodMatch[] = [
   { keywords: ["eggnog", "milk"], query: "leche", label: "Bebida con leche" },
   { keywords: ["red wine", "wine"], query: "vino", label: "Vino" },
   { keywords: ["beer", "beer glass", "beer bottle"], query: "cerveza", label: "Cerveza" },
-  { keywords: ["water bottle", "pop bottle", "soda"], query: "gaseosa", label: "Bebida" },
+  { keywords: ["water bottle", "pop bottle", "soda"], query: "gaseosa", label: "Bebida gaseosa" },
+  { keywords: ["steak", "beef", "fillet"], query: "bife de carne", label: "Carne / bife" },
+  { keywords: ["meatball"], query: "albóndigas", label: "Albóndigas" },
+  { keywords: ["fried", "french fries", "chips"], query: "papas fritas", label: "Papas fritas" },
+  { keywords: ["rice"], query: "arroz", label: "Arroz" },
+  { keywords: ["salad", "coleslaw"], query: "ensalada", label: "Ensalada" },
+  { keywords: ["sandwich", "sub"], query: "sándwich", label: "Sándwich" },
+  { keywords: ["tortilla", "wrap"], query: "tortilla", label: "Tortilla / wrap" },
+  { keywords: ["omelet", "omelette", "egg"], query: "huevo", label: "Huevo" },
+  { keywords: ["cheese"], query: "queso", label: "Queso" },
+  { keywords: ["yogurt"], query: "yogur", label: "Yogur" },
+  { keywords: ["cake", "cupcake", "muffin"], query: "torta", label: "Torta / pastel" },
+  { keywords: ["donut", "doughnut"], query: "donut", label: "Donut / factura" },
+  { keywords: ["cookie", "biscuit"], query: "galletitas", label: "Galletitas" },
+  { keywords: ["pie"], query: "tarta", label: "Tarta" },
+  { keywords: ["toast", "toaster"], query: "tostadas", label: "Tostadas" },
+  { keywords: ["cereal"], query: "cereales", label: "Cereales" },
+  { keywords: ["sausage", "bratwurst"], query: "chorizo", label: "Chorizo / salchicha" },
+  { keywords: ["lobster", "crab", "shrimp"], query: "mariscos", label: "Mariscos" },
+  { keywords: ["sushi"], query: "sushi", label: "Sushi" },
+  { keywords: ["plate", "bowl", "dish"], query: "plato de comida", label: "Plato de comida" },
+  { keywords: ["grill", "barbecue", "bbq"], query: "asado", label: "Asado" },
+  { keywords: ["tea", "teapot"], query: "té", label: "Té" },
+  { keywords: ["juice"], query: "jugo", label: "Jugo" },
+  { keywords: ["mate"], query: "mate", label: "Mate" },
+  { keywords: ["empanada"], query: "empanada", label: "Empanada" },
+  { keywords: ["milanesa", "schnitzel", "cutlet"], query: "milanesa", label: "Milanesa" },
+  { keywords: ["gnocchi"], query: "ñoquis", label: "Ñoquis" },
+  { keywords: ["lasagna", "lasagne"], query: "lasaña", label: "Lasaña" },
+  { keywords: ["paella"], query: "paella", label: "Paella" },
+  { keywords: ["fondue"], query: "fondue", label: "Fondue" },
+  { keywords: ["avocado"], query: "palta", label: "Palta" },
+  { keywords: ["tomato"], query: "tomate", label: "Tomate" },
+  { keywords: ["carrot"], query: "zanahoria", label: "Zanahoria" },
+  { keywords: ["potato"], query: "papa", label: "Papa" },
+  { keywords: ["onion"], query: "cebolla", label: "Cebolla" },
+  { keywords: ["grape"], query: "uvas", label: "Uvas" },
+  { keywords: ["watermelon"], query: "sandía", label: "Sandía" },
+  { keywords: ["pear"], query: "pera", label: "Pera" },
+  { keywords: ["peach"], query: "durazno", label: "Durazno" },
 ];
 
 let modelPromise: Promise<MobileNet> | null = null;
@@ -99,7 +138,7 @@ export async function classifyFoodImage(imageDataUrl: string): Promise<OnDeviceR
     image.src = imageDataUrl;
   });
 
-  const predictions = await model.classify(img, 5);
+  const predictions = await model.classify(img, 8);
   if (!predictions.length) return null;
 
   const matched: { food: FoodMatch; probability: number }[] = [];

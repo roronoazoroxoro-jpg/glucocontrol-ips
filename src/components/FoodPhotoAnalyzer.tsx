@@ -20,24 +20,7 @@ interface FoodPhotoResult {
   glucoseNote: string;
   healthTip: string;
   onDevice?: boolean;
-}
-
-function buildNotes(n: NutritionAnalysis): { glucoseNote: string; healthTip: string } {
-  const carbs = n.carbs ?? 0;
-  const sugar = n.sugar ?? 0;
-  let impacto: string;
-  if (carbs >= 45 || sugar >= 20) {
-    impacto = "Impacto ALTO en la glucosa: tiene bastantes carbohidratos/azúcares. Controlá la porción y medí tu glucosa después.";
-  } else if (carbs >= 20 || sugar >= 8) {
-    impacto = "Impacto MEDIO en la glucosa por sus carbohidratos. Acompañalo con proteína o fibra para amortiguar la subida.";
-  } else {
-    impacto = "Impacto BAJO en la glucosa: pocos carbohidratos. Buena opción para mantener niveles estables.";
-  }
-  const tip =
-    n.fiber >= 4
-      ? "Buena cantidad de fibra: ayuda a que la glucosa suba más lento."
-      : "Sumá una porción de verduras o fibra para equilibrar el plato.";
-  return { glucoseNote: impacto, healthTip: tip };
+  engine?: string;
 }
 
 interface FoodPhotoAnalyzerProps {
@@ -45,7 +28,7 @@ interface FoodPhotoAnalyzerProps {
   onLogged: () => void;
 }
 
-async function compressImage(file: File, maxSize = 1024, quality = 0.7): Promise<string> {
+async function compressImage(file: File, maxSize = 1024, quality = 0.72): Promise<string> {
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
@@ -78,6 +61,22 @@ async function compressImage(file: File, maxSize = 1024, quality = 0.7): Promise
   return canvas.toDataURL("image/jpeg", quality);
 }
 
+async function enrichOnServer(
+  name: string,
+  items: string[],
+  mealType: string,
+  candidates?: string[]
+): Promise<FoodPhotoResult | null> {
+  const res = await fetch("/api/nutrition/photo/enrich", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, items, candidates, mealType }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.result) return null;
+  return data.result as FoodPhotoResult;
+}
+
 export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps) {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
@@ -98,6 +97,24 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
     if (galleryRef.current) galleryRef.current.value = "";
   }
 
+  async function analyzeOnDevice(imageDataUrl: string, quiet = false): Promise<FoodPhotoResult | null> {
+    if (!quiet) {
+      setAnalyzingMsg("Analizando en tu celular (primera vez puede tardar unos segundos)...");
+    }
+    const detection = await classifyFoodImage(imageDataUrl);
+    if (!detection) return null;
+
+    const enriched = await enrichOnServer(
+      detection.label,
+      detection.items,
+      mealType,
+      [detection.query, ...detection.items]
+    );
+    if (!enriched) return null;
+
+    return { ...enriched, onDevice: true, engine: "device" };
+  }
+
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -105,69 +122,44 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
     setResult(null);
     setSaved(false);
     setAnalyzing(true);
-    setAnalyzingMsg("Analizando tu plato...");
+    setAnalyzingMsg("Analizando tu plato con IA...");
 
     try {
       const compressed = await compressImage(file);
       setPreview(compressed);
 
-      const res = await fetch("/api/nutrition/photo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: compressed }),
-      });
-      const data = await res.json();
+      // Servidor (Gemini/OpenAI/HF) y celular en paralelo — usamos el mejor resultado.
+      const [serverRes, deviceRes] = await Promise.all([
+        fetch("/api/nutrition/photo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: compressed }),
+        }).then(async (res) => {
+          const data = await res.json();
+          if (res.ok && data.result) return data.result as FoodPhotoResult;
+          return null;
+        }),
+        analyzeOnDevice(compressed, true).catch(() => null),
+      ]);
 
-      if (res.ok && data.result) {
-        setResult(data.result as FoodPhotoResult);
+      if (serverRes) {
+        setResult(serverRes);
         return;
       }
 
-      // Sin clave o error de la IA del servidor → análisis en el propio celular.
-      if (data.reason === "no_key" || data.reason === "error") {
-        await analyzeOnDevice(compressed);
+      if (deviceRes) {
+        setResult(deviceRes);
         return;
       }
 
-      setError(data.error ?? "No se pudo analizar la foto.");
+      setError(
+        "No pudimos reconocer la comida. Probá con una foto más clara del plato, con buena luz y el plato centrado."
+      );
     } catch {
       setError("No se pudo procesar la imagen. Intentá de nuevo.");
     } finally {
       setAnalyzing(false);
     }
-  }
-
-  async function analyzeOnDevice(imageDataUrl: string) {
-    setAnalyzingMsg("Analizando en tu celular (la primera vez puede tardar unos segundos)...");
-    const detection = await classifyFoodImage(imageDataUrl);
-    if (!detection) {
-      setError(
-        "No pudimos reconocer la comida en tu celular. Probá con una foto más clara o escribí qué comiste en la pestaña “Escribir”."
-      );
-      return;
-    }
-
-    const res = await fetch("/api/nutrition/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: detection.query, type: mealType }),
-    });
-    const data = await res.json();
-    const nutrition: NutritionAnalysis | undefined = data.nutrition;
-    if (!nutrition) {
-      setError("No pudimos calcular los nutrientes. Intentá de nuevo.");
-      return;
-    }
-
-    const notes = buildNotes(nutrition);
-    setResult({
-      name: detection.label,
-      items: detection.items,
-      nutrition,
-      glucoseNote: notes.glucoseNote,
-      healthTip: notes.healthTip,
-      onDevice: true,
-    });
   }
 
   async function saveMeal() {
@@ -193,6 +185,17 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
   }
 
   const n = result?.nutrition;
+
+  const engineLabel =
+    result?.engine === "gemini"
+      ? "Analizado con Google Gemini IA"
+      : result?.engine === "openai"
+        ? "Analizado con OpenAI"
+        : result?.engine === "huggingface"
+          ? "Analizado con IA de visión"
+          : result?.onDevice
+            ? "Reconocido en tu celular + base nutricional IPS/USDA"
+            : "Análisis nutricional automático";
 
   return (
     <div className="space-y-4">
@@ -235,7 +238,7 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
 
       {!preview && (
         <p className="text-xs text-slate-400 text-center leading-relaxed">
-          Sacá una foto de tu plato y la IA detecta los alimentos y calcula los nutrientes.
+          Sacá una foto clara del plato. La app detecta los alimentos y calcula nutrientes e impacto en tu glucosa.
         </p>
       )}
 
@@ -319,11 +322,7 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
             </div>
           )}
 
-          <p className="text-[10px] text-emerald-600/70">
-            {result.onDevice
-              ? "Reconocido en tu celular. Estimación aproximada según la porción."
-              : "Estimación por IA a partir de la foto. Puede variar según la porción real."}
-          </p>
+          <p className="text-[10px] text-emerald-600/70">{engineLabel}</p>
 
           <button
             type="button"

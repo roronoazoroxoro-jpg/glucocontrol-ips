@@ -14,7 +14,7 @@ export interface NutritionAnalysis {
   protein: number;
   fiber: number;
   sodium: number;
-  source: "local" | "edamam" | "openai" | "usda" | "openfoodfacts" | "estimate" | "cache";
+  source: "local" | "edamam" | "openai" | "gemini" | "usda" | "openfoodfacts" | "estimate" | "cache";
   confidence: "high" | "medium" | "low";
 }
 
@@ -326,6 +326,7 @@ export function getSourceLabel(source: NutritionAnalysis["source"]): string {
     local: "Base IPS Argentina",
     edamam: "Edamam Nutrición",
     openai: "IA Nutricional",
+    gemini: "IA Gemini (foto)",
     usda: "USDA FoodData",
     openfoodfacts: "Open Food Facts",
     estimate: "Estimación",

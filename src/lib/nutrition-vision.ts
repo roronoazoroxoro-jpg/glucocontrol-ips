@@ -1,4 +1,5 @@
-import type { NutritionAnalysis } from "./nutrition";
+import { analyzeNutrition, type NutritionAnalysis } from "./nutrition";
+import { buildGlucoseNotes } from "./food-photo-enrich";
 
 export interface FoodPhotoResult {
   name: string;
@@ -6,9 +7,12 @@ export interface FoodPhotoResult {
   nutrition: NutritionAnalysis;
   glucoseNote: string;
   healthTip: string;
+  engine?: "gemini" | "openai" | "huggingface" | "device";
 }
 
-const VISION_MODEL = "gpt-4o";
+const OPENAI_VISION_MODEL = "gpt-4o";
+const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"];
+const HF_CAPTION_MODEL = "Salesforce/blip-image-captioning-large";
 
 const SYSTEM_PROMPT = `Sos un nutricionista experto en comida argentina y misionera que analiza FOTOS de platos de comida para personas con diabetes.
 
@@ -41,32 +45,44 @@ type VisionResult =
   | { ok: false; reason: "no_key" | "no_food" | "error"; message: string };
 
 export async function analyzeFoodPhoto(imageDataUrl: string): Promise<VisionResult> {
-  const hasOpenAI = !!process.env.OPENAI_API_KEY;
   const hasGemini = !!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
+  const hasOpenAI = !!process.env.OPENAI_API_KEY?.trim();
+  const hasHF = !!(process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY);
 
-  if (!hasOpenAI && !hasGemini) {
-    return {
-      ok: false,
-      reason: "no_key",
-      message:
-        "El servidor no tiene una clave de IA de visión. Se usará el análisis en tu propio celular.",
-    };
+  // Prioridad: Gemini (gratis) → OpenAI → Hugging Face (caption + nutrición)
+  if (hasGemini) {
+    const r = await analyzeWithGeminiVision(imageDataUrl);
+    if (r.ok || r.reason === "no_food") return r;
   }
-
-  // Prioridad: OpenAI (si está) → Gemini (gratis)
   if (hasOpenAI) {
     const r = await analyzeWithOpenAIVision(imageDataUrl);
     if (r.ok || r.reason === "no_food") return r;
   }
-  if (hasGemini) {
-    const r = await analyzeWithGeminiVision(imageDataUrl);
-    return r;
+  if (hasHF) {
+    const r = await analyzeWithHuggingFaceVision(imageDataUrl);
+    if (r.ok || r.reason === "no_food") return r;
   }
 
-  return { ok: false, reason: "error", message: "No se pudo analizar la foto." };
+  if (!hasGemini && !hasOpenAI && !hasHF) {
+    return {
+      ok: false,
+      reason: "no_key",
+      message: "Usando análisis inteligente en tu celular.",
+    };
+  }
+
+  return {
+    ok: false,
+    reason: "error",
+    message: "No se pudo analizar en el servidor. Se usará tu celular.",
+  };
 }
 
-function buildResult(p: Record<string, unknown>, source: NutritionAnalysis["source"]): VisionResult {
+function buildResult(
+  p: Record<string, unknown>,
+  source: NutritionAnalysis["source"],
+  engine: FoodPhotoResult["engine"]
+): VisionResult {
   if (p.detected === false) {
     return {
       ok: false,
@@ -97,10 +113,17 @@ function buildResult(p: Record<string, unknown>, source: NutritionAnalysis["sour
       name,
       items: Array.isArray(p.items) ? (p.items as string[]) : [],
       nutrition,
-      glucoseNote: (p.glucoseNote as string) ?? "",
-      healthTip: (p.healthTip as string) ?? "",
+      glucoseNote: (p.glucoseNote as string) ?? buildGlucoseNotes(nutrition).glucoseNote,
+      healthTip: (p.healthTip as string) ?? buildGlucoseNotes(nutrition).healthTip,
+      engine,
     },
   };
+}
+
+function parseImageDataUrl(imageDataUrl: string) {
+  const match = imageDataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
+  if (!match) return null;
+  return { mimeType: match[1], base64: match[2] };
 }
 
 async function analyzeWithOpenAIVision(imageDataUrl: string): Promise<VisionResult> {
@@ -109,7 +132,7 @@ async function analyzeWithOpenAIVision(imageDataUrl: string): Promise<VisionResu
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const completion = await openai.chat.completions.create({
-      model: VISION_MODEL,
+      model: OPENAI_VISION_MODEL,
       response_format: { type: "json_object" },
       max_tokens: 500,
       temperature: 0.2,
@@ -127,19 +150,16 @@ async function analyzeWithOpenAIVision(imageDataUrl: string): Promise<VisionResu
 
     const raw = completion.choices[0]?.message?.content;
     if (!raw) return { ok: false, reason: "error", message: "No se pudo analizar la foto." };
-    return buildResult(JSON.parse(raw), "openai");
+    return buildResult(JSON.parse(raw), "openai", "openai");
   } catch {
-    return { ok: false, reason: "error", message: "Hubo un problema al analizar la foto." };
+    return { ok: false, reason: "error", message: "Error con OpenAI." };
   }
 }
 
-const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"];
-
 async function analyzeWithGeminiVision(imageDataUrl: string): Promise<VisionResult> {
   const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  const match = imageDataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
-  if (!match) return { ok: false, reason: "error", message: "Imagen inválida." };
-  const [, mimeType, base64] = match;
+  const parsed = parseImageDataUrl(imageDataUrl);
+  if (!parsed) return { ok: false, reason: "error", message: "Imagen inválida." };
 
   const body = JSON.stringify({
     system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
@@ -147,7 +167,7 @@ async function analyzeWithGeminiVision(imageDataUrl: string): Promise<VisionResu
       {
         parts: [
           { text: "Analizá esta foto de comida y devolvé solo el JSON." },
-          { inline_data: { mime_type: mimeType, data: base64 } },
+          { inline_data: { mime_type: parsed.mimeType, data: parsed.base64 } },
         ],
       },
     ],
@@ -158,31 +178,73 @@ async function analyzeWithGeminiVision(imageDataUrl: string): Promise<VisionResu
     try {
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body,
-        }
+        { method: "POST", headers: { "Content-Type": "application/json" }, body }
       );
-
-      // Modelo no disponible → probar el siguiente
       if (res.status === 404) continue;
       if (!res.ok) continue;
 
       const data = await res.json();
       const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!raw) continue;
-      return buildResult(JSON.parse(raw), "openai");
+      return buildResult(JSON.parse(raw), "gemini", "gemini");
     } catch {
       continue;
     }
   }
 
-  return {
-    ok: false,
-    reason: "error",
-    message: "No se pudo analizar la foto con la IA. Se usará el análisis en tu celular.",
-  };
+  return { ok: false, reason: "error", message: "Gemini no disponible." };
+}
+
+async function analyzeWithHuggingFaceVision(imageDataUrl: string): Promise<VisionResult> {
+  const token = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
+  const parsed = parseImageDataUrl(imageDataUrl);
+  if (!parsed || !token) return { ok: false, reason: "error", message: "HF no configurado." };
+
+  try {
+    const imageBytes = Buffer.from(parsed.base64, "base64");
+    const res = await fetch(
+      `https://router.huggingface.co/hf-inference/models/${HF_CAPTION_MODEL}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/octet-stream",
+        },
+        body: imageBytes,
+      }
+    );
+
+    if (!res.ok) return { ok: false, reason: "error", message: "HF error." };
+
+    const data = await res.json();
+    const caption: string =
+      Array.isArray(data) && data[0]?.generated_text
+        ? String(data[0].generated_text)
+        : typeof data?.generated_text === "string"
+          ? data.generated_text
+          : "";
+
+    if (!caption || caption.length < 3) {
+      return { ok: false, reason: "no_food", message: "No se detectó comida en la foto." };
+    }
+
+    const nutrition = await analyzeNutrition(caption, "comida");
+    const notes = buildGlucoseNotes(nutrition);
+
+    return {
+      ok: true,
+      result: {
+        name: nutrition.name,
+        items: caption.split(/,| and | con /i).map((s) => s.trim()).filter(Boolean).slice(0, 4),
+        nutrition,
+        glucoseNote: notes.glucoseNote,
+        healthTip: notes.healthTip,
+        engine: "huggingface",
+      },
+    };
+  } catch {
+    return { ok: false, reason: "error", message: "Error con Hugging Face." };
+  }
 }
 
 function round1(v: unknown): number {
