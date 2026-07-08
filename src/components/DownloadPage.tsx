@@ -302,6 +302,9 @@ export function DownloadPage() {
           <Link href="/terminos" className="text-emerald-700 hover:underline">
             Términos
           </Link>
+          <Link href="/admin/login" className="text-slate-400 hover:underline">
+            Acceso médico
+          </Link>
         </nav>
         <p className="text-xs text-slate-400 mt-6 max-w-md mx-auto leading-relaxed">
           Herramienta de apoyo informativo del IPS Misiones. No reemplaza la consulta

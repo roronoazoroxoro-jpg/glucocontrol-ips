@@ -11,6 +11,8 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:migrate:turso": "node scripts/migrate-v3.mjs && node scripts/apply-schema.mjs",
+    "db:migrate:admin": "node scripts/migrate-admin-role.mjs",
+    "create:doctor": "node scripts/create-doctor.mjs",
     "db:generate": "prisma generate",
     "setup:turso": "node scripts/provision-all.mjs",
     "postinstall": "prisma generate"

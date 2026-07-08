@@ -56,6 +56,7 @@ export async function POST(request: Request) {
           medications: JSON.stringify([]),
           acceptedTermsAt: new Date(),
           profileComplete: false,
+          role: "patient",
         },
       })
     );

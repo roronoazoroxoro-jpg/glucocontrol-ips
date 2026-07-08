@@ -12,6 +12,7 @@ model User {
   email                  String   @unique
   passwordHash           String
   name                   String
+  role                   String   @default("patient")
   diabetesType           String   @default("tipo2")
   targetMin              Int      @default(70)
   targetMax              Int      @default(140)

@@ -47,7 +47,12 @@ export function AuthForm({ mode }: AuthFormProps) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Error al procesar");
 
-      router.push(next);
+      const role = data.user?.role ?? "patient";
+      if (!isRegister && (role === "doctor" || role === "admin")) {
+        router.push("/admin");
+      } else {
+        router.push(next);
+      }
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error de conexión");

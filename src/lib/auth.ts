@@ -68,6 +68,10 @@ export function unauthorizedResponse() {
   return NextResponse.json({ error: "Sesión requerida" }, { status: 401 });
 }
 
+export function forbiddenResponse() {
+  return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+}
+
 export function sanitizeUser(user: {
   id: string;
   email: string;
@@ -81,12 +85,14 @@ export function sanitizeUser(user: {
   glucoseIntervalHours: number;
   notificationsEnabled: boolean;
   profileComplete: boolean;
+  role?: string;
   createdAt: Date;
 }) {
   return {
     id: user.id,
     email: user.email,
     name: user.name,
+    role: user.role ?? "patient",
     diabetesType: user.diabetesType,
     targetMin: user.targetMin,
     targetMax: user.targetMax,

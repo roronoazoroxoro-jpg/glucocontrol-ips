@@ -42,6 +42,7 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "role" TEXT NOT NULL DEFAULT 'patient',
     "diabetesType" TEXT NOT NULL DEFAULT 'tipo2',
     "targetMin" INTEGER NOT NULL DEFAULT 70,
     "targetMax" INTEGER NOT NULL DEFAULT 140,
