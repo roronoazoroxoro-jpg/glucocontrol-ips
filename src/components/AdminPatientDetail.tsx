@@ -6,6 +6,7 @@ import {
   Activity,
   ArrowLeft,
   Droplets,
+  FileText,
   MessageSquare,
   RefreshCw,
   Utensils,
@@ -127,15 +128,26 @@ export function AdminPatientDetail({ patientId }: { patientId: string }) {
               <p className="text-xs text-slate-500 truncate">{patient.email}</p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => load(true)}
-            disabled={refreshing}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-white touch-manipulation shrink-0"
-          >
-            <RefreshCw className={cn("w-3.5 h-3.5", refreshing && "animate-spin")} />
-            Actualizar
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <a
+              href={`/api/admin/patients/${patientId}/export`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1e5a9e] text-white text-xs font-medium hover:bg-[#174a82] touch-manipulation"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              Informe
+            </a>
+            <button
+              type="button"
+              onClick={() => load(true)}
+              disabled={refreshing}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-white touch-manipulation"
+            >
+              <RefreshCw className={cn("w-3.5 h-3.5", refreshing && "animate-spin")} />
+              Actualizar
+            </button>
+          </div>
         </div>
       </header>
 

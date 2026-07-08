@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   LogOut,
   RefreshCw,
+  Search,
   Stethoscope,
   Users,
   Utensils,
@@ -60,6 +61,7 @@ export function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [query, setQuery] = useState("");
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -98,6 +100,17 @@ export function AdminDashboard() {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/admin/login";
   }
+
+  const visiblePatients = (data?.patients ?? [])
+    .filter((p) => {
+      const q = query.trim().toLowerCase();
+      if (!q) return true;
+      return p.name.toLowerCase().includes(q) || p.email.toLowerCase().includes(q);
+    })
+    .sort((a, b) => {
+      if (a.glucoseAlert !== b.glucoseAlert) return a.glucoseAlert ? -1 : 1;
+      return 0;
+    });
 
   if (loading && !data) {
     return (
@@ -197,6 +210,17 @@ export function AdminDashboard() {
               />
             </div>
 
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Buscar paciente por nombre o email..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white/80 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+              />
+            </div>
+
             <div className="glass-card rounded-2xl overflow-hidden border border-white/70">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm min-w-[720px]">
@@ -211,14 +235,16 @@ export function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {data.patients.length === 0 ? (
+                    {visiblePatients.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="px-4 py-10 text-center text-slate-400">
-                          Aún no hay pacientes registrados
+                          {data.patients.length === 0
+                            ? "Aún no hay pacientes registrados"
+                            : "Ningún paciente coincide con la búsqueda"}
                         </td>
                       </tr>
                     ) : (
-                      data.patients.map((p) => (
+                      visiblePatients.map((p) => (
                         <tr key={p.id} className="hover:bg-white/60 transition">
                           <td className="px-4 py-3">
                             <p className="font-medium text-slate-800">{p.name}</p>
