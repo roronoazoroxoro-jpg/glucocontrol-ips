@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Droplets, Loader2, Sparkles, Utensils, X } from "lucide-react";
+import { Camera, Droplets, Loader2, Pencil, Sparkles, Utensils, X } from "lucide-react";
 import type { NutritionAnalysis } from "@/lib/nutrition";
 import { formatNutritionSummary, getSourceLabel } from "@/lib/nutrition";
+import { FoodPhotoAnalyzer } from "./FoodPhotoAnalyzer";
+import { cn } from "@/lib/utils";
 
 interface QuickActionsProps {
   onSuccess: () => void;
@@ -17,6 +19,7 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
   const [glucoseValue, setGlucoseValue] = useState("");
   const [mealName, setMealName] = useState("");
   const [mealType, setMealType] = useState("comida");
+  const [mealMode, setMealMode] = useState<"text" | "photo">("text");
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [nutrition, setNutrition] = useState<NutritionAnalysis | null>(null);
@@ -37,6 +40,7 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
     setMealName("");
     setNutrition(null);
     setShowMeal(false);
+    setMealMode("text");
   }
 
   useEffect(() => {
@@ -115,7 +119,7 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
           Glucosa
         </button>
         <button
-          onClick={() => { setShowMeal(true); setShowGlucose(false); setNutrition(null); }}
+          onClick={() => { setShowMeal(true); setShowGlucose(false); setNutrition(null); setMealMode("text"); }}
           className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-white border border-slate-200 text-slate-700 font-medium hover:border-emerald-300 hover:bg-emerald-50 transition text-sm touch-manipulation"
         >
           <Utensils className="w-4 h-4" />
@@ -162,22 +166,30 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
                 </button>
               </form>
             ) : (
-              <form onSubmit={submitMeal} className="space-y-4">
-                <div>
-                  <label className="text-sm text-slate-600 mb-1 block">
-                    ¿Qué comió o bebió?
-                  </label>
-                  <input
-                    type="text"
-                    value={mealName}
-                    onChange={(e) => setMealName(e.target.value)}
-                    placeholder="Ej: Milanesa con ensalada y mate"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-base"
-                    autoFocus
-                  />
-                  <p className="text-xs text-slate-400 mt-1.5">
-                    Solo escriba el alimento — los nutrientes se calculan solos
-                  </p>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-1 bg-slate-100 rounded-xl p-1">
+                  <button
+                    type="button"
+                    onClick={() => setMealMode("text")}
+                    className={cn(
+                      "flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition touch-manipulation",
+                      mealMode === "text" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-500"
+                    )}
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Escribir
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMealMode("photo")}
+                    className={cn(
+                      "flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition touch-manipulation",
+                      mealMode === "photo" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-500"
+                    )}
+                  >
+                    <Camera className="w-4 h-4" />
+                    Con foto
+                  </button>
                 </div>
 
                 <div>
@@ -193,6 +205,32 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
                     <option value="bebida">Bebida</option>
                     <option value="snack">Snack</option>
                   </select>
+                </div>
+
+                {mealMode === "photo" ? (
+                  <FoodPhotoAnalyzer
+                    mealType={mealType}
+                    onLogged={() => {
+                      onSuccess();
+                    }}
+                  />
+                ) : (
+                <form onSubmit={submitMeal} className="space-y-4">
+                <div>
+                  <label className="text-sm text-slate-600 mb-1 block">
+                    ¿Qué comió o bebió?
+                  </label>
+                  <input
+                    type="text"
+                    value={mealName}
+                    onChange={(e) => setMealName(e.target.value)}
+                    placeholder="Ej: Milanesa con ensalada y mate"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-base"
+                    autoFocus
+                  />
+                  <p className="text-xs text-slate-400 mt-1.5">
+                    Solo escriba el alimento — los nutrientes se calculan solos
+                  </p>
                 </div>
 
                 {(analyzing || nutrition) && (
@@ -240,7 +278,9 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
                 >
                   {loading ? "Guardando..." : analyzing ? "Analizando..." : "Registrar comida"}
                 </button>
-              </form>
+                </form>
+                )}
+              </div>
             )}
           </div>
         </div>

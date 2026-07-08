@@ -50,7 +50,10 @@ export async function POST(request: Request) {
     }
 
     let nutrition = null;
-    if (!skipAnalysis) {
+    if (body.nutrition && typeof body.nutrition === "object") {
+      // Nutrición ya calculada (por ejemplo desde el análisis de foto con IA)
+      nutrition = body.nutrition;
+    } else if (!skipAnalysis) {
       nutrition = await analyzeNutrition(name.trim(), type ?? "comida");
     }
 

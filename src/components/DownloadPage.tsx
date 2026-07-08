@@ -7,6 +7,7 @@ import {
   Activity,
   Apple,
   Brain,
+  Camera,
   ChevronRight,
   Download,
   Mic,
@@ -58,6 +59,11 @@ export function DownloadPage() {
   }
 
   const features = [
+    {
+      icon: Camera,
+      title: "Foto de tu comida",
+      desc: "Sacá una foto del plato y la IA detecta los alimentos y calcula calorías, carbohidratos e impacto en tu glucosa.",
+    },
     {
       icon: Activity,
       title: "Monitoreo de glucosa",
