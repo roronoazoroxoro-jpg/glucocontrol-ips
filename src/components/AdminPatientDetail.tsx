@@ -7,13 +7,20 @@ import {
   ArrowLeft,
   Droplets,
   FileText,
+  HeartPulse,
   MessageSquare,
   RefreshCw,
+  TriangleAlert,
   Utensils,
 } from "lucide-react";
 import { GlucoseChart } from "./GlucoseChart";
+import { BpChart, WeightChart } from "./VitalCharts";
+import { HealthVitalsPanel } from "./HealthVitalsPanel";
 import { IPSLogo } from "./IPSLogo";
+import { BrandMark } from "./BrandMark";
+import { DashboardSkeleton } from "./EmptyState";
 import { formatDate, formatGlucose, cn } from "@/lib/utils";
+import { SYMPTOM_TYPES } from "@/lib/health";
 import type { StatsSummary } from "@/lib/stats";
 import type { GlucoseAnalysis } from "@/lib/recommendations";
 
@@ -26,6 +33,8 @@ interface PatientDetailData {
     name: string;
     email: string;
     diabetesType: string;
+    conditions?: string | null;
+    heightCm?: number | null;
     targetMin: number;
     targetMax: number;
     doctorName: string | null;
@@ -33,6 +42,7 @@ interface PatientDetailData {
     profileComplete: boolean;
     createdAt: string;
   };
+  conditions?: string[];
   latest: { value: number; createdAt: string } | null;
   glucoseMeta: { label: string; alert: boolean; inTarget: boolean } | null;
   stats: StatsSummary;
@@ -48,6 +58,24 @@ interface PatientDetailData {
     createdAt: string;
   }[];
   recentChat: { role: string; content: string; createdAt: string }[];
+  bloodPressures: { systolic: number; diastolic: number; createdAt: string }[];
+  latestBp: { systolic: number; diastolic: number; pulse?: number | null; createdAt: string } | null;
+  bpStatus: { label: string; alert: boolean; color: string } | null;
+  weights: { weightKg: number; createdAt: string }[];
+  latestWeight: { weightKg: number; createdAt: string } | null;
+  bmi: number | null;
+  bmiCategory: { label: string } | null;
+  latestHr: { bpm: number; context: string; createdAt: string } | null;
+  hrStatus: { label: string; alert: boolean } | null;
+  latestChol: {
+    total?: number | null;
+    ldl?: number | null;
+    hdl?: number | null;
+    triglycerides?: number | null;
+    measuredAt: string;
+  } | null;
+  cholStatus: { label: string; alert: boolean } | null;
+  symptoms: { id: string; type: string; severity: number; createdAt: string }[];
 }
 
 const REFRESH_MS = 15000;
@@ -92,9 +120,12 @@ export function AdminPatientDetail({ patientId }: { patientId: string }) {
 
   if (loading && !data) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 safe-top">
-        <IPSLogo size="md" />
-        <p className="text-sm text-slate-500">Cargando ficha del paciente...</p>
+      <div className="min-h-screen safe-top">
+        <div className="flex flex-col items-center gap-2 pt-12 pb-4">
+          <IPSLogo size="md" />
+          <BrandMark size="sm" />
+        </div>
+        <DashboardSkeleton />
       </div>
     );
   }
@@ -179,6 +210,32 @@ export function AdminPatientDetail({ patientId }: { patientId: string }) {
           </span>
         </div>
 
+        {(data.conditions ?? []).length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {(data.conditions ?? []).map((c) => (
+              <span
+                key={c}
+                className="px-2.5 py-1 rounded-full bg-teal-50 text-teal-800 text-xs font-medium border border-teal-100 capitalize"
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <HealthVitalsPanel
+          latestBp={data.latestBp}
+          bpStatus={data.bpStatus}
+          latestWeight={data.latestWeight}
+          bmi={data.bmi}
+          bmiCategory={data.bmiCategory}
+          latestHr={data.latestHr}
+          hrStatus={data.hrStatus}
+          latestChol={data.latestChol}
+          cholStatus={data.cholStatus}
+          symptoms={data.symptoms ?? []}
+        />
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <StatBox
             label="Última glucosa"
@@ -186,9 +243,19 @@ export function AdminPatientDetail({ patientId }: { patientId: string }) {
             sub={data.glucoseMeta?.label}
             alert={data.glucoseMeta?.alert}
           />
-          <StatBox label="Promedio" value={data.stats.avgGlucose ? `${data.stats.avgGlucose} mg/dL` : "—"} />
-          <StatBox label="% en rango" value={data.stats.inRangePercent != null ? `${data.stats.inRangePercent}%` : "—"} />
-          <StatBox label="Comidas" value={String(data.stats.totalMeals)} sub={`${data.stats.totalCarbs}g carbohidratos`} />
+          <StatBox
+            label="Promedio glucosa"
+            value={data.stats.avgGlucose ? `${data.stats.avgGlucose} mg/dL` : "—"}
+          />
+          <StatBox
+            label="% en rango"
+            value={data.stats.inRangePercent != null ? `${data.stats.inRangePercent}%` : "—"}
+          />
+          <StatBox
+            label="Comidas"
+            value={String(data.stats.totalMeals)}
+            sub={`${data.stats.totalCarbs}g carbohidratos`}
+          />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -198,6 +265,10 @@ export function AdminPatientDetail({ patientId }: { patientId: string }) {
               targetMin={patient.targetMin}
               targetMax={patient.targetMax}
             />
+            <div className="grid md:grid-cols-2 gap-6">
+              <BpChart readings={data.bloodPressures ?? []} />
+              <WeightChart entries={data.weights ?? []} heightCm={patient.heightCm} />
+            </div>
 
             <section className="glass-card rounded-2xl p-5">
               <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
@@ -221,7 +292,9 @@ export function AdminPatientDetail({ patientId }: { patientId: string }) {
                       </div>
                       <div className="text-right text-xs shrink-0">
                         <p className="font-semibold text-slate-700">{m.carbs}g carb.</p>
-                        {m.calories != null && <p className="text-slate-400">{Math.round(m.calories)} kcal</p>}
+                        {m.calories != null && (
+                          <p className="text-slate-400">{Math.round(m.calories)} kcal</p>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -257,7 +330,8 @@ export function AdminPatientDetail({ patientId }: { patientId: string }) {
               <h3 className="font-semibold text-slate-800 mb-3">Perfil clínico</h3>
               <dl className="space-y-2 text-sm">
                 <Row label="Tipo diabetes" value={patient.diabetesType} />
-                <Row label="Rango objetivo" value={`${patient.targetMin}–${patient.targetMax} mg/dL`} />
+                <Row label="Altura" value={patient.heightCm ? `${patient.heightCm} cm` : "—"} />
+                <Row label="Rango glucosa" value={`${patient.targetMin}–${patient.targetMax} mg/dL`} />
                 <Row label="Médico asignado" value={patient.doctorName ?? "—"} />
                 <Row label="Registrado" value={formatDate(patient.createdAt)} />
               </dl>
@@ -270,7 +344,7 @@ export function AdminPatientDetail({ patientId }: { patientId: string }) {
               >
                 <h3 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
                   <Activity className="w-4 h-4" />
-                  Estado actual
+                  Estado glucémico
                 </h3>
                 <p className="text-sm font-medium" style={{ color: data.recommendation.color }}>
                   {data.recommendation.label}
@@ -283,8 +357,60 @@ export function AdminPatientDetail({ patientId }: { patientId: string }) {
 
             <section className="glass-card rounded-2xl p-5">
               <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                <HeartPulse className="w-4 h-4 text-rose-500" />
+                Cardio / peso
+              </h3>
+              <dl className="space-y-2 text-sm">
+                <Row
+                  label="Última presión"
+                  value={
+                    data.latestBp
+                      ? `${data.latestBp.systolic}/${data.latestBp.diastolic}`
+                      : "—"
+                  }
+                />
+                <Row label="Estado PA" value={data.bpStatus?.label ?? "—"} />
+                <Row
+                  label="Peso / IMC"
+                  value={
+                    data.latestWeight
+                      ? `${data.latestWeight.weightKg} kg${data.bmi != null ? ` · IMC ${data.bmi}` : ""}`
+                      : "—"
+                  }
+                />
+                <Row
+                  label="Pulso"
+                  value={data.latestHr ? `${data.latestHr.bpm} bpm` : "—"}
+                />
+                <Row label="Lípidos" value={data.cholStatus?.label ?? "Sin lab"} />
+              </dl>
+            </section>
+
+            <section className="glass-card rounded-2xl p-5">
+              <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                <TriangleAlert className="w-4 h-4 text-amber-600" />
+                Síntomas
+              </h3>
+              {(data.symptoms ?? []).length === 0 ? (
+                <p className="text-sm text-slate-400">Sin síntomas en el periodo</p>
+              ) : (
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {data.symptoms.map((s) => (
+                    <div key={s.id} className="text-xs bg-amber-50 rounded-lg px-3 py-2">
+                      <p className="font-medium text-amber-900">
+                        {SYMPTOM_TYPES.find((t) => t.id === s.type)?.label ?? s.type} · {s.severity}/5
+                      </p>
+                      <p className="text-amber-700/70">{formatDate(s.createdAt)}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="glass-card rounded-2xl p-5">
+              <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
                 <MessageSquare className="w-4 h-4 text-slate-500" />
-                Chat con IA (reciente)
+                Chat con IA
               </h3>
               {data.recentChat.length === 0 ? (
                 <p className="text-sm text-slate-400">Sin mensajes</p>
@@ -295,10 +421,14 @@ export function AdminPatientDetail({ patientId }: { patientId: string }) {
                       key={i}
                       className={cn(
                         "text-xs rounded-lg px-3 py-2",
-                        msg.role === "user" ? "bg-blue-50 text-blue-900" : "bg-slate-50 text-slate-700"
+                        msg.role === "user"
+                          ? "bg-blue-50 text-blue-900"
+                          : "bg-slate-50 text-slate-700"
                       )}
                     >
-                      <p className="font-medium mb-0.5 capitalize">{msg.role === "user" ? "Paciente" : "IA"}</p>
+                      <p className="font-medium mb-0.5 capitalize">
+                        {msg.role === "user" ? "Paciente" : "IA"}
+                      </p>
                       <p className="line-clamp-3">{msg.content}</p>
                     </div>
                   ))}
@@ -326,7 +456,9 @@ function StatBox({
   return (
     <div className={cn("glass-card rounded-2xl p-4", alert && "ring-2 ring-red-200")}>
       <p className="text-xs text-slate-500">{label}</p>
-      <p className={cn("text-xl font-bold mt-1", alert ? "text-red-600" : "text-slate-800")}>{value}</p>
+      <p className={cn("text-xl font-bold mt-1", alert ? "text-red-600" : "text-slate-800")}>
+        {value}
+      </p>
       {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
     </div>
   );

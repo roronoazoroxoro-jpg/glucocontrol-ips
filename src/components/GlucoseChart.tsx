@@ -11,6 +11,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { formatDateShort } from "@/lib/utils";
+import { EmptyState } from "./EmptyState";
 
 interface GlucoseChartProps {
   readings: { value: number; createdAt: string }[];
@@ -27,9 +28,11 @@ export function GlucoseChart({ readings, targetMin = 70, targetMax = 140 }: Gluc
 
   if (data.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-6 h-64 flex items-center justify-center">
-        <p className="text-sm text-slate-400">Sin datos de glucosa en este periodo</p>
-      </div>
+      <EmptyState
+        title="Sin datos de glucosa"
+        description="Registrá tu glucosa para ver la tendencia en este periodo."
+        className="h-64"
+      />
     );
   }
 

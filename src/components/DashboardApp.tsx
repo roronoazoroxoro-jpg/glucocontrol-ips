@@ -18,6 +18,8 @@ import { InstallPrompt } from "./InstallPrompt";
 import { NotificationScheduler, UpcomingRemindersBanner } from "./NotificationScheduler";
 import { VitalActions } from "./VitalActions";
 import { HealthVitalsPanel } from "./HealthVitalsPanel";
+import { BpChart, WeightChart } from "./VitalCharts";
+import { DashboardSkeleton } from "./EmptyState";
 import { parseMedications, parseMealTimes, DEFAULT_REMINDERS, type Medication } from "@/lib/reminders";
 import { parseConditions, HEALTH_CONDITIONS } from "@/lib/health";
 import type { GlucoseAnalysis } from "@/lib/recommendations";
@@ -60,6 +62,8 @@ interface DashboardData {
   stats: StatsSummary;
   recommendation: GlucoseAnalysis | null;
   conditions?: string[];
+  bloodPressures?: { systolic: number; diastolic: number; createdAt: string }[];
+  weights?: { weightKg: number; createdAt: string }[];
   latestBp: { systolic: number; diastolic: number; pulse?: number | null; createdAt: string } | null;
   bpStatus: { label: string; alert: boolean; color: string } | null;
   latestWeight: { weightKg: number; createdAt: string } | null;
@@ -137,10 +141,12 @@ export function DashboardApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 safe-top animate-fade-in">
-        <IPSLogo size="md" />
-        <BrandMark size="sm" />
-        <p className="text-sm text-slate-500">Cargando VitalIPS...</p>
+      <div className="min-h-screen safe-top">
+        <div className="flex flex-col items-center justify-center gap-3 pt-16 pb-6">
+          <IPSLogo size="md" />
+          <BrandMark size="sm" />
+        </div>
+        <DashboardSkeleton />
       </div>
     );
   }
@@ -259,6 +265,18 @@ export function DashboardApp() {
                   targetMin={user.targetMin}
                   targetMax={user.targetMax}
                 />
+
+                <div className="grid lg:grid-cols-2 gap-6">
+                  <BpChart
+                    readings={data.bloodPressures ?? []}
+                    targetSys={user.bpTargetSys ?? 130}
+                    targetDia={user.bpTargetDia ?? 80}
+                  />
+                  <WeightChart
+                    entries={data.weights ?? []}
+                    heightCm={user.heightCm}
+                  />
+                </div>
               </>
             )}
           </>

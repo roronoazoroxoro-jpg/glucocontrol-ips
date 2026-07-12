@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { SYMPTOM_TYPES } from "@/lib/health";
 import { cn } from "@/lib/utils";
+import { useToast } from "./Toast";
 
 interface VitalActionsProps {
   onSuccess: () => void;
@@ -19,6 +20,7 @@ interface VitalActionsProps {
 type VitalModal = "bp" | "weight" | "hr" | "chol" | "symptom" | null;
 
 export function VitalActions({ onSuccess }: VitalActionsProps) {
+  const { toast } = useToast();
   const [modal, setModal] = useState<VitalModal>(null);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -110,6 +112,18 @@ export function VitalActions({ onSuccess }: VitalActionsProps) {
       else if (modal === "chol" && data.status) setMsg(data.status.label);
       else if (modal === "symptom") setMsg(data.message);
       else setMsg("Guardado ✓");
+
+      const okMsg =
+        modal === "bp"
+          ? `Presión ${sys}/${dia} registrada`
+          : modal === "weight"
+            ? "Peso registrado"
+            : modal === "hr"
+              ? "Pulso registrado"
+              : modal === "chol"
+                ? "Laboratorio registrado"
+                : data.message ?? "Síntoma registrado";
+      toast(okMsg, data.emergency ? "error" : "success");
 
       onSuccess();
       setTimeout(close, 1400);

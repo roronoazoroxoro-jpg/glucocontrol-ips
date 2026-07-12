@@ -1,4 +1,4 @@
-const CACHE_NAME = "vitalips-v1";
+const CACHE_NAME = "vitalips-v2";
 const STATIC_ASSETS = [
   "/manifest.webmanifest",
   "/branding/ips-logo.svg",

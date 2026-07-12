@@ -11,6 +11,14 @@ import {
   staffUnauthorizedResponse,
   type Period,
 } from "@/lib/admin";
+import {
+  bmiCategory,
+  computeBMI,
+  getBpStatus,
+  getCholesterolStatus,
+  getHrStatus,
+  parseConditions,
+} from "@/lib/health";
 
 export const runtime = "nodejs";
 
@@ -34,7 +42,20 @@ export async function GET(
       return NextResponse.json({ error: "Paciente no encontrado" }, { status: 404 });
     }
 
-    const [readings, meals, latest, recentChat] = await Promise.all([
+    const [
+      readings,
+      meals,
+      latest,
+      recentChat,
+      bloodPressures,
+      latestBp,
+      weights,
+      latestWeight,
+      heartRates,
+      latestHr,
+      latestChol,
+      symptoms,
+    ] = await Promise.all([
       prisma.glucoseReading.findMany({
         where: { userId: patient.id, createdAt: { gte: start, lte: end } },
         orderBy: { createdAt: "asc" },
@@ -52,12 +73,50 @@ export async function GET(
         orderBy: { createdAt: "desc" },
         take: 10,
       }),
+      prisma.bloodPressureReading.findMany({
+        where: { userId: patient.id, createdAt: { gte: start, lte: end } },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.bloodPressureReading.findFirst({
+        where: { userId: patient.id },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.weightEntry.findMany({
+        where: { userId: patient.id, createdAt: { gte: start, lte: end } },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.weightEntry.findFirst({
+        where: { userId: patient.id },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.heartRateReading.findMany({
+        where: { userId: patient.id, createdAt: { gte: start, lte: end } },
+        orderBy: { createdAt: "desc" },
+        take: 30,
+      }),
+      prisma.heartRateReading.findFirst({
+        where: { userId: patient.id },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.cholesterolLab.findFirst({
+        where: { userId: patient.id },
+        orderBy: { measuredAt: "desc" },
+      }),
+      prisma.symptomLog.findMany({
+        where: { userId: patient.id, createdAt: { gte: start, lte: end } },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+      }),
     ]);
 
     const stats = computeStats(readings, meals, patient.targetMin, patient.targetMax);
     const glucoseMeta = latest
       ? glucoseStatusLabel(latest.value, patient.targetMin, patient.targetMax)
       : null;
+    const bmi =
+      latestWeight && patient.heightCm
+        ? computeBMI(latestWeight.weightKg, patient.heightCm)
+        : null;
 
     const recommendation = latest
       ? analyzeGlucose({
@@ -74,6 +133,7 @@ export async function GET(
       period,
       updatedAt: new Date().toISOString(),
       patient: sanitizePatientSummary(patient),
+      conditions: parseConditions(patient.conditions),
       latest,
       glucoseMeta,
       stats,
@@ -81,6 +141,19 @@ export async function GET(
       readings,
       meals,
       recentChat: recentChat.reverse(),
+      bloodPressures,
+      latestBp,
+      bpStatus: latestBp ? getBpStatus(latestBp.systolic, latestBp.diastolic) : null,
+      weights,
+      latestWeight,
+      bmi,
+      bmiCategory: bmi != null ? bmiCategory(bmi) : null,
+      heartRates,
+      latestHr,
+      hrStatus: latestHr ? getHrStatus(latestHr.bpm, latestHr.context) : null,
+      latestChol,
+      cholStatus: latestChol ? getCholesterolStatus(latestChol) : null,
+      symptoms,
     });
   } catch (error) {
     return dbErrorResponse("api/admin/patients/[id]", error);

@@ -5,6 +5,7 @@ import { Camera, Droplets, Loader2, Pencil, Sparkles, Utensils, X } from "lucide
 import type { NutritionAnalysis } from "@/lib/nutrition";
 import { formatNutritionSummary, getSourceLabel } from "@/lib/nutrition";
 import { FoodPhotoAnalyzer } from "./FoodPhotoAnalyzer";
+import { useToast } from "./Toast";
 import { cn } from "@/lib/utils";
 
 interface QuickActionsProps {
@@ -14,6 +15,7 @@ interface QuickActionsProps {
 }
 
 export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickActionsProps) {
+  const { toast } = useToast();
   const [showGlucose, setShowGlucose] = useState(false);
   const [showMeal, setShowMeal] = useState(false);
   const [glucoseValue, setGlucoseValue] = useState("");
@@ -81,6 +83,7 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
       });
       setGlucoseValue("");
       closeGlucose();
+      toast("Glucosa registrada ✓");
       onSuccess();
     } finally {
       setLoading(false);
@@ -102,6 +105,7 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
         }),
       });
       resetMealForm();
+      toast("Comida registrada ✓");
       onSuccess();
     } finally {
       setLoading(false);
@@ -211,6 +215,7 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
                   <FoodPhotoAnalyzer
                     mealType={mealType}
                     onLogged={() => {
+                      toast("Comida por foto registrada ✓");
                       onSuccess();
                     }}
                   />
