@@ -2,11 +2,27 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Activity, Download, FileText, LayoutDashboard, LogOut, MessageSquare, RefreshCw, Settings } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  Bell,
+  Droplets,
+  FileText,
+  Home,
+  LogOut,
+  Menu,
+  MessageSquare,
+  Plus,
+  RefreshCw,
+  Scale,
+  Settings,
+  UserRound,
+  Utensils,
+  X,
+} from "lucide-react";
 import { IPSLogo } from "./IPSLogo";
 import { BrandMark } from "./BrandMark";
 import { Onboarding } from "./Onboarding";
-import { GlucoseCard } from "./GlucoseCard";
 import { RecommendationsPanel } from "./RecommendationsPanel";
 import { QuickActions } from "./QuickActions";
 import { StatsCards } from "./StatsCards";
@@ -17,7 +33,7 @@ import { VoiceAssistant } from "./VoiceAssistant";
 import { InstallPrompt } from "./InstallPrompt";
 import { NotificationScheduler, UpcomingRemindersBanner } from "./NotificationScheduler";
 import { VitalActions } from "./VitalActions";
-import { HealthVitalsPanel } from "./HealthVitalsPanel";
+import { HomeDashboard } from "./HomeDashboard";
 import { BpChart, WeightChart } from "./VitalCharts";
 import { DashboardSkeleton } from "./EmptyState";
 import { parseMedications, parseMealTimes, DEFAULT_REMINDERS, type Medication } from "@/lib/reminders";
@@ -82,7 +98,7 @@ interface DashboardData {
   symptoms: { id: string; type: string; severity: number; createdAt: string }[];
 }
 
-type Tab = "dashboard" | "historial" | "chat" | "perfil";
+type Tab = "dashboard" | "historial" | "reportes" | "perfil" | "chat";
 
 export function DashboardApp() {
   const [user, setUser] = useState<User | null>(null);
@@ -92,6 +108,10 @@ export function DashboardApp() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [tab, setTab] = useState<Tab>("dashboard");
   const [showGlucoseModal, setShowGlucoseModal] = useState(false);
+  const [showMealModal, setShowMealModal] = useState(false);
+  const [vitalModal, setVitalModal] = useState<"bp" | "weight" | "hr" | "chol" | "symptom" | null>(null);
+  const [showAddSheet, setShowAddSheet] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   const fetchUser = useCallback(async () => {
     setLoadError(null);
@@ -176,136 +196,98 @@ export function DashboardApp() {
     return <Onboarding onComplete={fetchUser} initialName={user?.name} />;
   }
 
-  const tabs: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
-    { key: "dashboard", label: "Inicio", icon: LayoutDashboard },
+  const tabs: { key: Tab; label: string; icon: typeof Home }[] = [
+    { key: "dashboard", label: "Inicio", icon: Home },
     { key: "historial", label: "Historial", icon: Activity },
-    { key: "chat", label: "Asistente", icon: MessageSquare },
-    { key: "perfil", label: "Perfil", icon: Settings },
+    { key: "reportes", label: "Reportes", icon: BarChart3 },
+    { key: "perfil", label: "Perfil", icon: UserRound },
+  ];
+
+  const addOptions = [
+    { label: "Glucosa", icon: Droplets, action: () => { setShowAddSheet(false); setShowGlucoseModal(true); } },
+    { label: "Comida", icon: Utensils, action: () => { setShowAddSheet(false); setShowMealModal(true); } },
+    { label: "Presión", icon: Activity, action: () => { setShowAddSheet(false); setVitalModal("bp"); } },
+    { label: "Peso", icon: Scale, action: () => { setShowAddSheet(false); setVitalModal("weight"); } },
+    { label: "Asistente", icon: MessageSquare, action: () => { setShowAddSheet(false); setTab("chat"); } },
   ];
 
   return (
-    <div className="min-h-screen pb-24 md:pb-8 safe-bottom">
-      <header className="sticky top-0 z-30 glass-card border-b border-teal-100/80 safe-top animate-fade-in">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="shrink-0 rounded-xl bg-white px-2 py-1.5 shadow-sm ring-1 ring-slate-100">
-              <IPSLogo size="sm" />
-            </div>
-            <div className="min-w-0">
-              <BrandMark size="sm" />
-              <p className="text-xs text-slate-500 truncate">Hola, {user.name}</p>
-            </div>
+    <div className="min-h-screen pb-28 md:pb-10 safe-bottom bg-[#f3faf9]">
+      <header className="sticky top-0 z-30 bg-[#f3faf9]/95 backdrop-blur-md safe-top animate-fade-in">
+        <div className="max-w-lg mx-auto px-4 pt-3 pb-2 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setShowMenu(true)}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-teal-700 hover:bg-white/80 touch-manipulation"
+            aria-label="Menú"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <div className="text-center">
+            <BrandMark size="sm" />
+            <div className="mx-auto mt-1 h-0.5 w-10 rounded-full bg-teal-500/70" />
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Link
-              href="/descargar"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-navy-700 hover:text-navy-800 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100"
-            >
-              <Download className="w-3.5 h-3.5" />
-              Instalar
-            </Link>
-            <div className="hidden md:flex gap-1 bg-slate-100/90 rounded-xl p-1">
-              {tabs.map((t) => (
-                <button
-                  key={t.key}
-                  onClick={() => setTab(t.key)}
-                  className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition",
-                    tab === t.key
-                      ? "bg-gradient-to-r from-navy-800 to-teal-700 text-white shadow-sm"
-                      : "text-slate-500 hover:text-navy-800"
-                  )}
-                >
-                  <t.icon className="w-4 h-4" />
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={() => setTab("chat")}
+            className="relative w-10 h-10 rounded-xl flex items-center justify-center text-teal-700 hover:bg-white/80 touch-manipulation"
+            aria-label="Asistente"
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-teal-500 live-dot" />
+          </button>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-lg mx-auto px-4 py-4 space-y-5 md:max-w-6xl">
         {tab === "dashboard" && (
           <>
-            <div>
-              <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-teal-700 mb-1">
-                Hoy
-              </p>
-              <h2 className="font-display text-2xl font-semibold text-navy-900">
-                Tu seguimiento
-              </h2>
-            </div>
-
-            <QuickActions
-              onSuccess={fetchDashboard}
-              openGlucose={showGlucoseModal}
-              onGlucoseClose={() => setShowGlucoseModal(false)}
-            />
-
-            <VitalActions onSuccess={fetchDashboard} />
-
+            {data ? (
+              <HomeDashboard
+                userName={user.name}
+                doctorName={user.doctorName}
+                latestGlucose={data.latest?.value ?? null}
+                glucoseAt={
+                  data.readings.length
+                    ? data.readings[data.readings.length - 1]?.createdAt
+                    : null
+                }
+                recommendation={data.recommendation}
+                latestBp={data.latestBp}
+                bpStatus={data.bpStatus}
+                latestWeight={data.latestWeight}
+                weights={data.weights ?? []}
+                bmi={data.bmi}
+                bmiCategory={data.bmiCategory}
+                onOpenGlucose={() => setShowGlucoseModal(true)}
+                onOpenVitals={() => setShowAddSheet(true)}
+                onOpenProfile={() => setTab("perfil")}
+              />
+            ) : (
+              <DashboardSkeleton />
+            )}
             <UpcomingRemindersBanner />
-
-            {data && (
-              <>
-                <HealthVitalsPanel
-                  latestBp={data.latestBp}
-                  bpStatus={data.bpStatus}
-                  latestWeight={data.latestWeight}
-                  bmi={data.bmi}
-                  bmiCategory={data.bmiCategory}
-                  latestHr={data.latestHr}
-                  hrStatus={data.hrStatus}
-                  latestChol={data.latestChol}
-                  cholStatus={data.cholStatus}
-                  symptoms={data.symptoms ?? []}
-                />
-
-                <StatsCards stats={data.stats} />
-
-                <div className="grid lg:grid-cols-2 gap-6">
-                  <GlucoseCard
-                    value={data.latest?.value ?? null}
-                    recommendation={data.recommendation}
-                    onAddReading={() => setShowGlucoseModal(true)}
-                  />
-                  <RecommendationsPanel recommendation={data.recommendation} />
-                </div>
-
-                <GlucoseChart
-                  readings={data.readings}
-                  targetMin={user.targetMin}
-                  targetMax={user.targetMax}
-                />
-
-                <div className="grid lg:grid-cols-2 gap-6">
-                  <BpChart
-                    readings={data.bloodPressures ?? []}
-                    targetSys={user.bpTargetSys ?? 130}
-                    targetDia={user.bpTargetDia ?? 80}
-                  />
-                  <WeightChart
-                    entries={data.weights ?? []}
-                    heightCm={user.heightCm}
-                  />
-                </div>
-              </>
+            {data?.recommendation && (
+              <div className="max-w-lg mx-auto">
+                <RecommendationsPanel recommendation={data.recommendation} />
+              </div>
             )}
           </>
         )}
 
         {tab === "historial" && data && (
-          <>
+          <div className="space-y-5 max-w-lg mx-auto md:max-w-none">
             <div>
-              <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-teal-700 mb-1">
-                Evolución
-              </p>
-              <h2 className="font-display text-2xl font-semibold text-navy-900">
-                Historial y tendencias
-              </h2>
+              <h2 className="font-display text-2xl font-semibold text-navy-900">Historial</h2>
+              <p className="text-sm text-teal-700 mt-1">Tu evolución en el tiempo</p>
             </div>
-            <div className="grid lg:grid-cols-2 gap-6">
+            <HistoryPanel
+              period={period}
+              onPeriodChange={setPeriod}
+              meals={data.meals}
+              readings={data.readings}
+            />
+            <div className="grid lg:grid-cols-2 gap-5">
               <GlucoseChart
                 readings={data.readings}
                 targetMin={user.targetMin}
@@ -317,14 +299,39 @@ export function DashboardApp() {
                 targetDia={user.bpTargetDia ?? 80}
               />
             </div>
-            <WeightChart entries={data.weights ?? []} heightCm={user.heightCm} />
-            <HistoryPanel
-              period={period}
-              onPeriodChange={setPeriod}
-              meals={data.meals}
+          </div>
+        )}
+
+        {tab === "reportes" && data && (
+          <div className="space-y-5 max-w-lg mx-auto md:max-w-none">
+            <div>
+              <h2 className="font-display text-2xl font-semibold text-navy-900">Reportes</h2>
+              <p className="text-sm text-teal-700 mt-1">Resumen y tendencias</p>
+            </div>
+            <StatsCards stats={data.stats} />
+            <GlucoseChart
               readings={data.readings}
+              targetMin={user.targetMin}
+              targetMax={user.targetMax}
             />
-          </>
+            <div className="grid lg:grid-cols-2 gap-5">
+              <BpChart
+                readings={data.bloodPressures ?? []}
+                targetSys={user.bpTargetSys ?? 130}
+                targetDia={user.bpTargetDia ?? 80}
+              />
+              <WeightChart entries={data.weights ?? []} heightCm={user.heightCm} />
+            </div>
+            <a
+              href="/api/export?format=html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-gradient-to-r from-navy-800 to-teal-700 text-white font-semibold touch-manipulation"
+            >
+              <FileText className="w-4 h-4" />
+              Exportar informe médico
+            </a>
+          </div>
         )}
 
         {tab === "chat" && <ChatPanel userName={user.name} />}
@@ -332,25 +339,179 @@ export function DashboardApp() {
         {tab === "perfil" && <ProfilePanel user={user} onUpdate={fetchUser} />}
       </main>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-card border-t border-teal-100/80 z-30 safe-bottom-nav">
-        <div className="flex justify-around py-1.5">
-          {tabs.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={cn(
-                "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-[11px] font-medium transition touch-manipulation min-w-[4.25rem]",
-                tab === t.key
-                  ? "text-navy-800 bg-teal-50"
-                  : "text-slate-400 hover:text-slate-600"
-              )}
-            >
-              <t.icon className={cn("w-5 h-5", tab === t.key && "text-teal-700")} />
-              {t.label}
-            </button>
-          ))}
+      {/* Bottom nav — estilo mockup con FAB */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 safe-bottom-nav">
+        <div className="mx-3 mb-3 rounded-[1.5rem] bg-white/95 border border-slate-200/80 shadow-lg shadow-navy-900/10 backdrop-blur-md">
+          <div className="grid grid-cols-5 items-end px-1 pt-2 pb-1.5">
+            {tabs.slice(0, 2).map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setTab(t.key)}
+                className={cn(
+                  "flex flex-col items-center gap-0.5 py-2 text-[10px] font-semibold touch-manipulation",
+                  tab === t.key ? "text-teal-700" : "text-slate-400"
+                )}
+              >
+                <t.icon className="w-5 h-5" />
+                {t.label}
+              </button>
+            ))}
+
+            <div className="flex justify-center -mt-7">
+              <button
+                type="button"
+                onClick={() => setShowAddSheet(true)}
+                className="w-14 h-14 rounded-full bg-gradient-to-br from-navy-800 to-teal-600 text-white shadow-xl shadow-teal-800/30 flex items-center justify-center touch-manipulation active:scale-95 transition"
+                aria-label="Registrar"
+              >
+                <Plus className="w-7 h-7" strokeWidth={2.5} />
+              </button>
+            </div>
+
+            {tabs.slice(2).map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setTab(t.key)}
+                className={cn(
+                  "flex flex-col items-center gap-0.5 py-2 text-[10px] font-semibold touch-manipulation",
+                  tab === t.key ? "text-teal-700" : "text-slate-400"
+                )}
+              >
+                <t.icon className="w-5 h-5" />
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
       </nav>
+
+      {/* Desktop tabs */}
+      <div className="hidden md:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-40 gap-1 bg-white/95 border border-slate-200 rounded-2xl p-1.5 shadow-xl">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => setTab(t.key)}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition",
+              tab === t.key
+                ? "bg-gradient-to-r from-navy-800 to-teal-700 text-white"
+                : "text-slate-500 hover:text-navy-800"
+            )}
+          >
+            <t.icon className="w-4 h-4" />
+            {t.label}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => setShowAddSheet(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-teal-50 text-navy-800"
+        >
+          <Plus className="w-4 h-4" />
+          Registrar
+        </button>
+      </div>
+
+      {showAddSheet && (
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm p-4 safe-bottom">
+          <div className="w-full max-w-md rounded-[1.75rem] bg-white p-5 shadow-2xl animate-scale-in">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="font-display text-xl font-semibold text-navy-900">Registrar</p>
+                <p className="text-xs text-slate-500 mt-0.5">Elegí qué querés cargar</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddSheet(false)}
+                className="p-2 rounded-xl hover:bg-slate-100"
+              >
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {addOptions.map((o) => (
+                <button
+                  key={o.label}
+                  type="button"
+                  onClick={o.action}
+                  className="flex items-center gap-3 rounded-2xl border border-teal-100 bg-[#f3faf9] px-4 py-3.5 text-left hover:border-teal-300 touch-manipulation"
+                >
+                  <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-navy-800 to-teal-600 text-white flex items-center justify-center">
+                    <o.icon className="w-5 h-5" />
+                  </span>
+                  <span className="font-semibold text-navy-900 text-sm">{o.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showMenu && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" onClick={() => setShowMenu(false)}>
+          <div
+            className="absolute left-0 top-0 bottom-0 w-[78%] max-w-xs bg-white shadow-2xl p-5 safe-top animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <BrandMark size="sm" />
+              <button type="button" onClick={() => setShowMenu(false)} className="p-2">
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+            <div className="mb-4 rounded-2xl bg-[#f3faf9] p-3">
+              <IPSLogo size="sm" />
+              <p className="text-xs text-slate-500 mt-2">Hola, {user.name}</p>
+            </div>
+            <nav className="space-y-1">
+              {[
+                { label: "Inicio", tab: "dashboard" as Tab },
+                { label: "Historial", tab: "historial" as Tab },
+                { label: "Reportes", tab: "reportes" as Tab },
+                { label: "Asistente IA", tab: "chat" as Tab },
+                { label: "Perfil", tab: "perfil" as Tab },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => {
+                    setTab(item.tab);
+                    setShowMenu(false);
+                  }}
+                  className="w-full text-left px-3 py-3 rounded-xl text-sm font-medium text-navy-900 hover:bg-teal-50"
+                >
+                  {item.label}
+                </button>
+              ))}
+              <Link
+                href="/descargar"
+                className="block px-3 py-3 rounded-xl text-sm font-medium text-teal-800 hover:bg-teal-50"
+                onClick={() => setShowMenu(false)}
+              >
+                Instalar app
+              </Link>
+            </nav>
+          </div>
+        </div>
+      )}
+
+      <QuickActions
+        hideButtons
+        onSuccess={fetchDashboard}
+        openGlucose={showGlucoseModal}
+        onGlucoseClose={() => setShowGlucoseModal(false)}
+        openMeal={showMealModal}
+        onMealClose={() => setShowMealModal(false)}
+      />
+      <VitalActions
+        hideButtons
+        onSuccess={fetchDashboard}
+        openModal={vitalModal}
+        onModalClose={() => setVitalModal(null)}
+      />
 
       <VoiceAssistant userName={user.name} onMealLogged={fetchDashboard} />
       <NotificationScheduler enabled={user.notificationsEnabled !== false} />
