@@ -1,10 +1,12 @@
-const CACHE_NAME = "vitalips-v2";
+const CACHE_NAME = "vitalips-v3";
 const STATIC_ASSETS = [
   "/manifest.webmanifest",
   "/branding/ips-logo.svg",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/apple-touch-icon.png",
+  "/landing/hero.webp",
+  "/landing/phone.webp",
 ];
 
 self.addEventListener("install", (event) => {

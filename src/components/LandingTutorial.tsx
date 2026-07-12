@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Activity,
   Camera,
@@ -28,11 +29,18 @@ interface GuideStep {
   desc: string;
   tip?: string;
   icon: React.ComponentType<{ className?: string }>;
+  image: string;
 }
 
 const GUIDES: Record<
   GuideId,
-  { eyebrow: string; title: string; subtitle: string; steps: GuideStep[]; cta?: { href: string; label: string } }
+  {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    steps: GuideStep[];
+    cta?: { href: string; label: string };
+  }
 > = {
   cuenta: {
     eyebrow: "Empezá en minutos",
@@ -47,6 +55,7 @@ const GUIDES: Record<
         desc: "Entrá a Crear cuenta, escribí tu nombre, correo y una contraseña. Aceptá los términos para continuar.",
         tip: "Usá un correo que mires seguido: ahí van avisos importantes.",
         icon: UserPlus,
+        image: "/landing/hero.webp",
       },
       {
         label: "Perfil",
@@ -54,6 +63,7 @@ const GUIDES: Record<
         desc: "Completá tu perfil: condiciones (diabetes, hipertensión, peso, corazón, colesterol) y datos básicos. La app se adapta a vos.",
         tip: "Podés marcar varias condiciones a la vez.",
         icon: ClipboardList,
+        image: "/landing/vitals.webp",
       },
       {
         label: "App",
@@ -61,12 +71,14 @@ const GUIDES: Record<
         desc: "Agregá VitalIPS a la pantalla de inicio. Así la abrís como una app, sin buscarla en el navegador.",
         tip: "En Android: Instalar. En iPhone: Safari → Compartir → Agregar a inicio.",
         icon: Lock,
+        image: "/landing/phone.webp",
       },
       {
         label: "Listo",
         title: "Empezá a registrar",
         desc: "Ya podés cargar glucosa, presión, peso, comidas y síntomas. Tu historial queda guardado para vos y tu equipo médico.",
         icon: ShieldCheck,
+        image: "/landing/phone.webp",
       },
     ],
   },
@@ -81,6 +93,7 @@ const GUIDES: Record<
         title: "Registrá tus signos",
         desc: "Cargá glucosa, presión arterial, pulso, peso e IMC. Ves tendencias y alertas claras cuando algo sale de rango.",
         icon: Droplets,
+        image: "/landing/vitals.webp",
       },
       {
         label: "Comida",
@@ -88,18 +101,21 @@ const GUIDES: Record<
         desc: "Sacá una foto de la comida o describila. La app estima nutrientes e impacto en tu salud.",
         tip: "Cuanto más clara la foto, mejor la estimación.",
         icon: Camera,
+        image: "/landing/food.webp",
       },
       {
         label: "Voz e IA",
         title: "Hablá o preguntá",
         desc: "Registrá datos por voz y consultá al asistente según tu perfil. Orientación práctica, no diagnóstico.",
         icon: Mic,
+        image: "/landing/phone.webp",
       },
       {
         label: "Informe",
         title: "Exportá tu evolución",
         desc: "Descargá un informe para llevar a la consulta o compartirlo con tu médico IPS cuando lo pida.",
         icon: FileDown,
+        image: "/landing/doctor.webp",
       },
     ],
   },
@@ -114,6 +130,7 @@ const GUIDES: Record<
         title: "Visibilidad en tiempo real",
         desc: "Los profesionales del IPS pueden ver tu ficha, registros recientes y alertas desde el panel médico.",
         icon: Stethoscope,
+        image: "/landing/doctor.webp",
       },
       {
         label: "Alertas",
@@ -121,18 +138,21 @@ const GUIDES: Record<
         desc: "Valores fuera de rango o síntomas importantes quedan visibles para un seguimiento más oportuno.",
         tip: "Ante una emergencia, llamá a tu servicio de urgencias. La app no reemplaza atención inmediata.",
         icon: HeartPulse,
+        image: "/landing/vitals.webp",
       },
       {
         label: "Consulta",
         title: "Mejores decisiones juntos",
         desc: "En el consultorio, el médico ya tiene tu historial de glucosa, presión, peso y comidas. Menos memoria, más datos.",
         icon: Activity,
+        image: "/landing/doctor.webp",
       },
       {
         label: "Privacidad",
         title: "Datos protegidos",
         desc: "Tu información es de uso sanitario del IPS. Vos controlás qué registrás; el acceso médico es para tu cuidado.",
         icon: ShieldCheck,
+        image: "/landing/hero.webp",
       },
     ],
   },
@@ -186,8 +206,7 @@ export function LandingTutorial() {
 
   return (
     <div id="tutorial" className="scroll-mt-6">
-      {/* Intro */}
-      <section className="px-4 pt-20 pb-8 md:pt-24">
+      <section className="px-4 pt-16 pb-8 md:pt-20">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs font-semibold tracking-[0.22em] uppercase text-teal-700 mb-4">
             Tutorial
@@ -201,7 +220,6 @@ export function LandingTutorial() {
           </p>
         </div>
 
-        {/* Tabs */}
         <div className="max-w-2xl mx-auto mt-10 flex p-1.5 rounded-2xl bg-white/70 border border-teal-100/80 shadow-sm backdrop-blur-sm">
           {TABS.map((t) => {
             const on = guide === t.id;
@@ -225,7 +243,6 @@ export function LandingTutorial() {
         </div>
       </section>
 
-      {/* Interactive steps */}
       <section className="px-4 pb-16 md:pb-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10 md:mb-12">
@@ -240,8 +257,7 @@ export function LandingTutorial() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-[1fr_1.05fr] gap-8 lg:gap-12 items-start">
-            {/* Step list */}
+          <div className="grid lg:grid-cols-[1fr_1.15fr] gap-8 lg:gap-10 items-start">
             <ol className="relative space-y-0">
               <div
                 className="absolute left-[1.35rem] top-6 bottom-6 w-px bg-gradient-to-b from-teal-300 via-navy-300 to-teal-200 hidden sm:block"
@@ -257,7 +273,9 @@ export function LandingTutorial() {
                       onClick={() => setStep(i)}
                       className={cn(
                         "w-full text-left flex gap-4 sm:gap-5 p-3 sm:p-4 rounded-2xl transition-all duration-300 touch-manipulation group",
-                        on ? "bg-white/90 shadow-lg shadow-navy-900/5 border border-teal-100" : "hover:bg-white/50 border border-transparent"
+                        on
+                          ? "bg-white shadow-lg shadow-navy-900/5 border border-teal-100"
+                          : "hover:bg-white/60 border border-transparent"
                       )}
                     >
                       <span
@@ -296,41 +314,47 @@ export function LandingTutorial() {
               })}
             </ol>
 
-            {/* Detail panel */}
             <div
               key={`${guide}-${step}`}
-              className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-navy-900 via-navy-800 to-teal-800 text-white p-7 md:p-9 shadow-2xl shadow-navy-900/25 animate-scale-in"
+              className="relative overflow-hidden rounded-[1.75rem] bg-navy-900 text-white shadow-2xl shadow-navy-900/25 animate-scale-in"
             >
-              <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-teal-400/20 blur-3xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-40 h-40 rounded-full bg-sky-400/15 blur-2xl pointer-events-none" />
-
-              <div className="relative">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
-                    <active.icon className="w-6 h-6 text-teal-200" />
+              <div className="relative h-44 sm:h-52 md:h-56">
+                <Image
+                  src={active.image}
+                  alt=""
+                  fill
+                  sizes="(max-width:1024px) 100vw, 520px"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-navy-900/40 to-navy-900/10" />
+                <div className="absolute bottom-4 left-5 flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/25">
+                    <active.icon className="w-5 h-5 text-teal-200" />
                   </div>
                   <div>
-                    <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-teal-200/90">
+                    <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-teal-200">
                       Paso {String(step + 1).padStart(2, "0")} · {active.label}
                     </p>
-                    <p className="text-xs text-white/50 mt-0.5">
+                    <p className="text-xs text-white/55">
                       {step + 1} de {current.steps.length}
                     </p>
                   </div>
                 </div>
+              </div>
 
-                <h4 className="font-display text-2xl md:text-3xl font-semibold leading-tight mb-4">
+              <div className="p-6 md:p-8 pt-5">
+                <h4 className="font-display text-2xl md:text-3xl font-semibold leading-tight mb-3">
                   {active.title}
                 </h4>
                 <p className="text-teal-50/90 text-base leading-relaxed">{active.desc}</p>
 
                 {active.tip && (
-                  <p className="mt-5 text-sm text-teal-100/90 border-l-2 border-teal-300/50 pl-4 leading-relaxed">
+                  <p className="mt-4 text-sm text-teal-100/90 border-l-2 border-teal-300/50 pl-4 leading-relaxed">
                     {active.tip}
                   </p>
                 )}
 
-                <div className="mt-8 flex items-center gap-3">
+                <div className="mt-7 flex items-center gap-3">
                   <button
                     type="button"
                     disabled={step === 0}
@@ -368,8 +392,7 @@ export function LandingTutorial() {
                   )}
                 </div>
 
-                {/* Progress dots */}
-                <div className="mt-6 flex justify-center gap-2">
+                <div className="mt-5 flex justify-center gap-2">
                   {current.steps.map((_, i) => (
                     <button
                       key={i}
@@ -389,91 +412,7 @@ export function LandingTutorial() {
         </div>
       </section>
 
-      {/* Doctor spotlight */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#e8f6f4] via-[#eef4f9] to-[#e6f0f8]" />
-        <div className="absolute inset-0 pointer-events-none opacity-40">
-          <div className="absolute top-10 left-[10%] w-64 h-64 rounded-full bg-teal-300/40 blur-3xl" />
-          <div className="absolute bottom-0 right-[5%] w-72 h-72 rounded-full bg-sky-300/30 blur-3xl" />
-        </div>
-
-        <div className="relative max-w-5xl mx-auto px-4 py-16 md:py-20">
-          <div className="grid md:grid-cols-2 gap-10 md:gap-14 items-center">
-            <div>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase text-teal-700 mb-3">
-                Cuidado en equipo
-              </p>
-              <h3 className="font-display text-3xl md:text-4xl font-semibold text-navy-900 leading-tight">
-                Vos registrás.
-                <br />
-                <span className="gradient-text">Tu médico ve.</span>
-              </h3>
-              <p className="mt-5 text-slate-600 leading-relaxed">
-                Cada registro suma a tu ficha clínica digital. El profesional del IPS puede
-                revisar tendencias, alertas e informes — para decidir con más información y
-                acompañarte mejor entre consultas.
-              </p>
-              <ul className="mt-6 space-y-3">
-                {[
-                  "Panel médico con pacientes y alertas",
-                  "Historial de signos vitales y comidas",
-                  "Informes listos para la consulta",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm text-slate-700">
-                    <span className="mt-0.5 w-5 h-5 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center shrink-0">
-                      <ShieldCheck className="w-3 h-3" />
-                    </span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="relative">
-              <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-teal-400/30 to-navy-600/20 blur-xl" />
-              <div className="relative rounded-[1.75rem] bg-white/90 border border-white p-6 md:p-8 shadow-xl shadow-navy-900/8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-navy-800 to-teal-600 flex items-center justify-center">
-                      <Stethoscope className="w-6 h-6 text-white" />
-                    </div>
-                    <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 live-dot border-2 border-white" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-navy-900">Equipo IPS conectado</p>
-                    <p className="text-xs text-slate-500">Seguimiento activo · en vivo</p>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {[
-                    { label: "Glucosa reciente", value: "Visible", tone: "text-teal-700" },
-                    { label: "Presión / pulso", value: "En ficha", tone: "text-navy-700" },
-                    { label: "Alertas", value: "Priorizadas", tone: "text-coral-600" },
-                    { label: "Informe clínico", value: "Exportable", tone: "text-teal-700" },
-                  ].map((row) => (
-                    <div
-                      key={row.label}
-                      className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0"
-                    >
-                      <span className="text-sm text-slate-600">{row.label}</span>
-                      <span className={cn("text-sm font-semibold", row.tone)}>{row.value}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <p className="mt-6 text-xs text-slate-500 leading-relaxed">
-                  Transparencia total: sabés que tus datos sirven para un mejor cuidado, no para
-                  quedarse guardados sin uso.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="px-4 py-16 md:py-20">
+      <section className="px-4 py-16 md:py-20 bg-white/40">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-10">
             <p className="text-xs font-semibold tracking-[0.2em] uppercase text-teal-700 mb-3">
@@ -494,7 +433,7 @@ export function LandingTutorial() {
                     "rounded-2xl border transition-colors duration-300",
                     open
                       ? "bg-white border-teal-200 shadow-sm"
-                      : "bg-white/50 border-transparent hover:border-teal-100"
+                      : "bg-white/70 border-transparent hover:border-teal-100"
                   )}
                 >
                   <button

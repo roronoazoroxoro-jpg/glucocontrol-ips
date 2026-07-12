@@ -15,7 +15,6 @@ import {
 import { IPSLogo } from "@/components/IPSLogo";
 import { BrandMark } from "@/components/BrandMark";
 import { LandingTutorial } from "@/components/LandingTutorial";
-import { cn } from "@/lib/utils";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -59,58 +58,29 @@ export function DownloadPage() {
     if (outcome === "accepted") setDeferred(null);
   }
 
-  const pillars = [
-    {
-      icon: HeartPulse,
-      title: "Seguimiento diario",
-      desc: "Glucosa, presión, peso, pulso y síntomas en un solo lugar.",
-    },
-    {
-      icon: Camera,
-      title: "Alimentación inteligente",
-      desc: "Foto o texto de tu comida, con nutrientes e impacto en tu salud.",
-    },
-    {
-      icon: Stethoscope,
-      title: "Visibilidad médica",
-      desc: "Tu equipo IPS ve tu evolución y descarga informes clínicos.",
-    },
-  ];
-
   return (
-    <div className="min-h-screen safe-bottom">
-      {/* HERO — una sola composición */}
-      <header className="relative min-h-[100dvh] flex flex-col overflow-hidden hero-mesh safe-top">
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-24 -left-20 w-[28rem] h-[28rem] rounded-full bg-teal-300/30 blur-3xl animate-float" />
-          <div className="absolute top-[40%] -right-24 w-[34rem] h-[34rem] rounded-full bg-sky-400/25 blur-3xl animate-float-delayed" />
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-gradient-to-t from-black/25 to-transparent" />
-          {/* Pulso visual de marca */}
-          <svg
-            className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-[min(92vw,720px)] opacity-25 animate-fade-in"
-            viewBox="0 0 720 120"
-            fill="none"
-            aria-hidden
-          >
-            <path
-              d="M0 60 H180 L210 60 L240 20 L270 100 L300 60 H420 L450 60 L480 35 L510 85 L540 60 H720"
-              stroke="white"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="landing-pulse-line"
-            />
-          </svg>
-        </div>
+    <div className="min-h-screen safe-bottom bg-[#eef6f8]">
+      {/* HERO full-bleed con imagen real */}
+      <header className="relative min-h-[100dvh] flex flex-col overflow-hidden safe-top">
+        <Image
+          src="/landing/hero.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-[center_30%] landing-hero-img"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-navy-900/75 via-navy-900/55 to-navy-900/85" />
+        <div className="absolute inset-0 bg-gradient-to-r from-navy-900/50 via-transparent to-teal-900/35" />
 
-        <nav className="relative z-20 px-4 pt-5 flex items-center justify-between max-w-5xl mx-auto w-full animate-fade-in">
-          <div className="inline-flex items-center rounded-xl bg-white/95 px-3 py-2 shadow-md shadow-black/10">
+        <nav className="relative z-20 px-4 pt-5 flex items-center justify-between max-w-6xl mx-auto w-full animate-fade-in">
+          <div className="inline-flex items-center rounded-xl bg-white/95 px-3 py-2 shadow-md shadow-black/15">
             <IPSLogo size="sm" showText />
           </div>
           <div className="flex items-center gap-4 sm:gap-5">
             <a
               href="#tutorial"
-              className="text-xs font-medium text-white/85 hover:text-white transition"
+              className="text-xs font-medium text-white/90 hover:text-white transition"
             >
               Cómo funciona
             </a>
@@ -123,13 +93,13 @@ export function DownloadPage() {
           </div>
         </nav>
 
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 pb-20 text-center">
-          <BrandMark size="xl" light className="animate-fade-up drop-shadow-sm" />
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 pb-24 text-center">
+          <BrandMark size="xl" light className="animate-fade-up drop-shadow-lg" />
           <h1 className="sr-only">VitalIPS</h1>
-          <p className="mt-6 text-white text-xl md:text-2xl max-w-lg animate-fade-up stagger-1 font-medium tracking-tight">
+          <p className="mt-6 text-white text-xl md:text-2xl max-w-lg animate-fade-up stagger-1 font-medium tracking-tight drop-shadow-md">
             Tu salud integral, todos los días.
           </p>
-          <p className="mt-3 text-teal-100/85 text-sm md:text-base max-w-md animate-fade-up stagger-2 leading-relaxed">
+          <p className="mt-3 text-teal-50/90 text-sm md:text-base max-w-md animate-fade-up stagger-2 leading-relaxed">
             Seguimiento entre consultas para afiliados del Instituto de Previsión Social ·
             Posadas, Misiones.
           </p>
@@ -155,7 +125,7 @@ export function DownloadPage() {
                 {deferred ? (
                   <button
                     onClick={handleInstall}
-                    className="btn-press inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-white/12 text-white border border-white/35 backdrop-blur-md font-semibold touch-manipulation"
+                    className="btn-press inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-white/15 text-white border border-white/40 backdrop-blur-md font-semibold touch-manipulation"
                   >
                     <Download className="w-5 h-5" />
                     Instalar app
@@ -163,7 +133,7 @@ export function DownloadPage() {
                 ) : (
                   <Link
                     href="/login"
-                    className="btn-press inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-white/12 text-white border border-white/35 backdrop-blur-md font-semibold touch-manipulation"
+                    className="btn-press inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-white/15 text-white border border-white/40 backdrop-blur-md font-semibold touch-manipulation"
                   >
                     Ya tengo cuenta
                   </Link>
@@ -172,43 +142,167 @@ export function DownloadPage() {
             )}
           </div>
         </div>
+
+        <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#eef6f8] to-transparent z-10 pointer-events-none" />
       </header>
 
-      {/* Propósito */}
-      <section className="relative px-4 py-20 md:py-24">
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-teal-700 mb-4 animate-fade-up">
-            Para el día a día
-          </p>
-          <h2 className="font-display text-3xl md:text-4xl font-semibold text-navy-900 leading-tight animate-fade-up stagger-1">
-            Entre consultas, tu salud sigue acompañada
-          </h2>
-          <p className="mt-5 text-slate-600 text-base md:text-lg leading-relaxed animate-fade-up stagger-2">
-            VitalIPS no reemplaza al médico: te ayuda a registrar cómo vas y le da a tu equipo
-            IPS datos reales para decidir mejor.
-          </p>
-        </div>
+      {/* Producto en mano + pilares con foto */}
+      <section className="relative px-4 -mt-6 md:-mt-16 pb-16 md:pb-24 z-20">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[0.9fr_1.1fr] gap-10 lg:gap-14 items-end">
+          <div className="relative mx-auto w-full max-w-[280px] md:max-w-[320px] animate-fade-up">
+            <div className="absolute -inset-8 rounded-full bg-teal-400/25 blur-3xl pointer-events-none" />
+            <Image
+              src="/landing/phone.webp"
+              alt="Vista de VitalIPS en el celular"
+              width={640}
+              height={860}
+              className="relative w-full h-auto drop-shadow-2xl"
+              priority
+            />
+          </div>
 
-        <div className="max-w-4xl mx-auto mt-14 grid md:grid-cols-3 gap-10 md:gap-8">
-          {pillars.map((p, i) => (
-            <div
-              key={p.title}
-              className={cn("text-center md:text-left animate-fade-up", `stagger-${i + 1}`)}
-            >
-              <div className="inline-flex w-12 h-12 rounded-2xl bg-gradient-to-br from-navy-700 to-teal-600 items-center justify-center mb-4 shadow-lg shadow-teal-700/20">
-                <p.icon className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="font-display text-xl font-semibold text-navy-900 mb-2">{p.title}</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">{p.desc}</p>
+          <div className="pb-2">
+            <p className="text-xs font-semibold tracking-[0.2em] uppercase text-teal-700 mb-3">
+              Para el día a día
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl font-semibold text-navy-900 leading-tight">
+              Entre consultas, tu salud sigue acompañada
+            </h2>
+            <p className="mt-4 text-slate-600 text-base md:text-lg leading-relaxed max-w-xl">
+              VitalIPS no reemplaza al médico: te ayuda a registrar cómo vas y le da a tu equipo
+              IPS datos reales para decidir mejor.
+            </p>
+
+            <div className="mt-10 grid sm:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: HeartPulse,
+                  title: "Seguimiento diario",
+                  desc: "Glucosa, presión, peso, pulso y síntomas.",
+                },
+                {
+                  icon: Camera,
+                  title: "Comida inteligente",
+                  desc: "Foto del plato y nutrientes estimados.",
+                },
+                {
+                  icon: Stethoscope,
+                  title: "Visibilidad médica",
+                  desc: "Tu equipo IPS ve evolución e informes.",
+                },
+              ].map((p) => (
+                <div key={p.title}>
+                  <div className="inline-flex w-11 h-11 rounded-2xl bg-gradient-to-br from-navy-700 to-teal-600 items-center justify-center mb-3 shadow-lg shadow-teal-700/20">
+                    <p.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-display text-lg font-semibold text-navy-900 mb-1">
+                    {p.title}
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{p.desc}</p>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Galería narrativa — imágenes grandes */}
+      <section className="px-4 pb-6">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-5 md:gap-6">
+          <figure className="relative group overflow-hidden rounded-[1.75rem] min-h-[280px] md:min-h-[360px]">
+            <Image
+              src="/landing/vitals.webp"
+              alt="Registro de presión arterial en casa"
+              fill
+              sizes="(max-width:768px) 100vw, 50vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <figcaption className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-900/25 to-transparent flex flex-col justify-end p-6 md:p-8">
+              <p className="text-[11px] font-bold tracking-[0.18em] uppercase text-teal-200 mb-2">
+                Signos vitales
+              </p>
+              <h3 className="font-display text-2xl font-semibold text-white leading-tight">
+                Glucosa, presión y peso, cuando los medís
+              </h3>
+              <p className="mt-2 text-sm text-white/80 max-w-sm leading-relaxed">
+                Registrá en segundos y mirá cómo vas a lo largo de los días.
+              </p>
+            </figcaption>
+          </figure>
+
+          <figure className="relative group overflow-hidden rounded-[1.75rem] min-h-[280px] md:min-h-[360px]">
+            <Image
+              src="/landing/food.webp"
+              alt="Foto de comida para análisis nutricional"
+              fill
+              sizes="(max-width:768px) 100vw, 50vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+            <figcaption className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-900/25 to-transparent flex flex-col justify-end p-6 md:p-8">
+              <p className="text-[11px] font-bold tracking-[0.18em] uppercase text-teal-200 mb-2">
+                Alimentación
+              </p>
+              <h3 className="font-display text-2xl font-semibold text-white leading-tight">
+                Sacá una foto de tu plato
+              </h3>
+              <p className="mt-2 text-sm text-white/80 max-w-sm leading-relaxed">
+                La app estima nutrientes e impacto en tu salud.
+              </p>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      {/* Médico al tanto — foto dominante */}
+      <section className="px-4 py-10 md:py-16">
+        <div className="max-w-6xl mx-auto relative overflow-hidden rounded-[2rem] min-h-[420px] md:min-h-[480px]">
+          <Image
+            src="/landing/doctor.webp"
+            alt="Médico revisando la evolución del paciente"
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-navy-900/92 via-navy-900/70 to-navy-900/25" />
+          <div className="relative z-10 max-w-xl px-6 py-12 md:px-12 md:py-16">
+            <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-teal-200 mb-3">
+              Cuidado en equipo
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl font-semibold text-white leading-tight">
+              Vos registrás.
+              <br />
+              Tu médico ve.
+            </h2>
+            <p className="mt-4 text-teal-50/90 text-base leading-relaxed">
+              El equipo del IPS puede revisar tu ficha, alertas e informes. Así el cuidado no
+              empieza de cero en cada consulta: llega con tu historia real.
+            </p>
+            <ul className="mt-6 space-y-2.5 text-sm text-white/90">
+              <li className="flex gap-2">
+                <span className="text-teal-300">▸</span> Panel médico con pacientes y alertas
+              </li>
+              <li className="flex gap-2">
+                <span className="text-teal-300">▸</span> Historial de signos vitales y comidas
+              </li>
+              <li className="flex gap-2">
+                <span className="text-teal-300">▸</span> Informes listos para la consulta
+              </li>
+            </ul>
+            <a
+              href="#tutorial"
+              className="btn-press mt-8 inline-flex items-center gap-2 text-sm font-semibold text-white border-b border-white/40 pb-0.5 hover:border-white transition"
+            >
+              Ver cómo funciona
+              <ChevronRight className="w-4 h-4" />
+            </a>
+          </div>
         </div>
       </section>
 
       <LandingTutorial />
 
       {/* Instalar */}
-      <section className="px-4 py-16 md:py-20 bg-white/40">
+      <section className="px-4 py-16 md:py-20 bg-white/50">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="font-display text-2xl md:text-3xl font-semibold text-navy-900">
@@ -281,7 +375,6 @@ export function DownloadPage() {
         </div>
       </section>
 
-      {/* Cierre */}
       <footer className="px-4 py-14 border-t border-teal-100/70">
         <div className="max-w-lg mx-auto text-center">
           <BrandMark size="md" className="mb-3" />

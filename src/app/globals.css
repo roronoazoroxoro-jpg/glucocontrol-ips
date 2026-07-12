@@ -209,6 +209,16 @@ body {
   to { stroke-dashoffset: 0; }
 }
 
+.landing-hero-img {
+  transform: scale(1.08);
+  animation: hero-ken 22s ease-in-out infinite alternate;
+}
+
+@keyframes hero-ken {
+  from { transform: scale(1.08) translate(0, 0); }
+  to { transform: scale(1.16) translate(-1.5%, -1%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
   .animate-fade-in,
@@ -218,12 +228,17 @@ body {
   .brand-wordmark,
   .pulse-ring,
   .live-dot,
-  .landing-pulse-line {
+  .landing-pulse-line,
+  .landing-hero-img {
     animation: none !important;
   }
 
   .landing-pulse-line {
     stroke-dashoffset: 0;
+  }
+
+  .landing-hero-img {
+    transform: scale(1.08);
   }
 }
 
