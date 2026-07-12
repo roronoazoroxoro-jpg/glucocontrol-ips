@@ -220,7 +220,7 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
           <button
             type="button"
             onClick={() => cameraRef.current?.click()}
-            className="flex flex-col items-center justify-center gap-2 py-6 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-medium shadow-md touch-manipulation"
+            className="flex flex-col items-center justify-center gap-2 py-6 rounded-2xl bg-gradient-to-br from-navy-800 to-teal-700 text-white font-medium shadow-md touch-manipulation"
           >
             <Camera className="w-7 h-7" />
             <span className="text-sm">Sacar foto</span>
@@ -230,7 +230,7 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
             onClick={() => galleryRef.current?.click()}
             className="flex flex-col items-center justify-center gap-2 py-6 rounded-2xl bg-white border border-slate-200 text-slate-700 font-medium touch-manipulation"
           >
-            <ImageIcon className="w-7 h-7 text-emerald-600" />
+            <ImageIcon className="w-7 h-7 text-teal-700" />
             <span className="text-sm">Elegir foto</span>
           </button>
         </div>
@@ -279,10 +279,10 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
       )}
 
       {result && n && (
-        <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 space-y-3">
+        <div className="rounded-2xl bg-teal-50 border border-teal-200 p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-emerald-600" />
-            <span className="text-sm font-semibold text-emerald-800">{result.name}</span>
+            <Sparkles className="w-4 h-4 text-teal-700" />
+            <span className="text-sm font-semibold text-navy-800">{result.name}</span>
           </div>
 
           {result.items.length > 0 && (
@@ -290,7 +290,7 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
               {result.items.map((item, i) => (
                 <span
                   key={i}
-                  className="px-2 py-0.5 rounded-full bg-white text-emerald-700 text-xs border border-emerald-200"
+                  className="px-2 py-0.5 rounded-full bg-white text-navy-700 text-xs border border-teal-200"
                 >
                   {item}
                 </span>
@@ -298,7 +298,7 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
             </div>
           )}
 
-          <p className="text-xs text-emerald-700">Porción estimada: {n.servingSize}</p>
+          <p className="text-xs text-navy-700">Porción estimada: {n.servingSize}</p>
 
           <div className="grid grid-cols-2 gap-2 text-xs">
             <PhotoBadge label="Calorías" value={`${n.calories} kcal`} />
@@ -322,13 +322,13 @@ export function FoodPhotoAnalyzer({ mealType, onLogged }: FoodPhotoAnalyzerProps
             </div>
           )}
 
-          <p className="text-[10px] text-emerald-600/70">{engineLabel}</p>
+          <p className="text-[10px] text-teal-700/70">{engineLabel}</p>
 
           <button
             type="button"
             onClick={saveMeal}
             disabled={saving || saved}
-            className="w-full py-3 rounded-xl bg-emerald-600 text-white font-medium disabled:opacity-60 touch-manipulation"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-navy-800 to-teal-700 text-white font-medium disabled:opacity-60 touch-manipulation"
           >
             {saved ? "Guardado ✓" : saving ? "Guardando..." : "Registrar esta comida"}
           </button>

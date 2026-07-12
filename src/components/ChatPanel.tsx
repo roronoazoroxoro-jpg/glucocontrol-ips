@@ -73,21 +73,21 @@ export function ChatPanel({ userName }: ChatPanelProps) {
   ];
 
   return (
-    <div className="glass-card rounded-2xl flex flex-col h-[480px]">
-      <div className="p-4 border-b border-slate-100">
-        <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-          <Bot className="w-5 h-5 text-emerald-600" />
-          Asistente IA
+    <div className="glass-card rounded-2xl flex flex-col min-h-[calc(100dvh-11rem)] md:min-h-0 md:h-[560px]">
+      <div className="p-4 border-b border-teal-100">
+        <h3 className="font-display text-lg font-semibold text-navy-900 flex items-center gap-2">
+          <Bot className="w-5 h-5 text-teal-700" />
+          Asistente VitalIPS
         </h3>
-        <p className="text-xs text-slate-400 mt-0.5">
-          Pregúntame sobre tu glucosa, comidas y recomendaciones
+        <p className="text-xs text-slate-500 mt-0.5">
+          Preguntame sobre tu glucosa, comidas y recomendaciones
         </p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <div className="text-center py-8">
-            <Bot className="w-10 h-10 text-emerald-300 mx-auto mb-3" />
+            <Bot className="w-10 h-10 text-teal-300 mx-auto mb-3" />
             <p className="text-sm text-slate-500">
               Hola {userName}, ¿en qué puedo ayudarte?
             </p>
@@ -96,7 +96,7 @@ export function ChatPanel({ userName }: ChatPanelProps) {
                 <button
                   key={prompt}
                   onClick={() => setInput(prompt)}
-                  className="text-xs px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition"
+                  className="text-xs px-3 py-1.5 rounded-full bg-teal-50 text-navy-700 hover:bg-teal-100 transition"
                 >
                   {prompt}
                 </button>
@@ -114,15 +114,15 @@ export function ChatPanel({ userName }: ChatPanelProps) {
             )}
           >
             {msg.role === "assistant" && (
-              <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                <Bot className="w-4 h-4 text-emerald-600" />
+              <div className="w-7 h-7 rounded-full bg-teal-100 flex items-center justify-center shrink-0">
+                <Bot className="w-4 h-4 text-teal-700" />
               </div>
             )}
             <div
               className={cn(
                 "max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed",
                 msg.role === "user"
-                  ? "bg-emerald-600 text-white rounded-br-md"
+                  ? "bg-gradient-to-r from-navy-800 to-teal-700 text-white rounded-br-md"
                   : "bg-slate-100 text-slate-700 rounded-bl-md"
               )}
             >
@@ -138,8 +138,8 @@ export function ChatPanel({ userName }: ChatPanelProps) {
 
         {loading && (
           <div className="flex gap-2">
-            <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center">
-              <Bot className="w-4 h-4 text-emerald-600" />
+            <div className="w-7 h-7 rounded-full bg-teal-100 flex items-center justify-center">
+              <Bot className="w-4 h-4 text-teal-700" />
             </div>
             <div className="bg-slate-100 px-4 py-2.5 rounded-2xl rounded-bl-md">
               <div className="flex gap-1">
@@ -163,13 +163,13 @@ export function ChatPanel({ userName }: ChatPanelProps) {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Escribe tu mensaje..."
-            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm"
+            placeholder="Escribí tu mensaje..."
+            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none text-sm"
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="p-2.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition disabled:opacity-50"
+            className="p-2.5 rounded-xl bg-gradient-to-r from-navy-800 to-teal-700 text-white hover:opacity-95 transition disabled:opacity-50 touch-manipulation"
           >
             <Send className="w-5 h-5" />
           </button>

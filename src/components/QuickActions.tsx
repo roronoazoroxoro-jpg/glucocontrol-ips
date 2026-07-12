@@ -117,14 +117,14 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
       <div className="flex gap-3">
         <button
           onClick={() => { setShowGlucose(true); setShowMeal(false); }}
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium shadow-md hover:shadow-lg transition text-sm touch-manipulation"
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-navy-800 to-teal-700 text-white font-semibold shadow-lg shadow-teal-800/20 hover:opacity-95 transition text-sm touch-manipulation"
         >
           <Droplets className="w-4 h-4" />
           Glucosa
         </button>
         <button
           onClick={() => { setShowMeal(true); setShowGlucose(false); setNutrition(null); setMealMode("text"); }}
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-white border border-slate-200 text-slate-700 font-medium hover:border-emerald-300 hover:bg-emerald-50 transition text-sm touch-manipulation"
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white border border-teal-200 text-navy-800 font-semibold hover:border-teal-400 hover:bg-teal-50/80 transition text-sm touch-manipulation"
         >
           <Utensils className="w-4 h-4" />
           Comida / Bebida
@@ -135,7 +135,7 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4 safe-bottom">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-slate-800">
+              <h3 className="font-display text-lg font-semibold text-navy-900">
                 {showGlucose ? "Registrar glucosa" : "Registrar comida o bebida"}
               </h3>
               <button
@@ -157,14 +157,14 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
                     placeholder="Ej: 120"
                     min={20}
                     max={600}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-2xl font-bold text-center"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none text-2xl font-bold text-center"
                     autoFocus
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading || !glucoseValue}
-                  className="w-full py-3 rounded-xl bg-emerald-600 text-white font-medium disabled:opacity-50 touch-manipulation"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-navy-800 to-teal-700 text-white font-medium disabled:opacity-50 touch-manipulation"
                 >
                   {loading ? "Guardando..." : "Guardar"}
                 </button>
@@ -177,7 +177,7 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
                     onClick={() => setMealMode("text")}
                     className={cn(
                       "flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition touch-manipulation",
-                      mealMode === "text" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-500"
+                      mealMode === "text" ? "bg-white text-navy-800 shadow-sm" : "text-slate-500"
                     )}
                   >
                     <Pencil className="w-4 h-4" />
@@ -188,7 +188,7 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
                     onClick={() => setMealMode("photo")}
                     className={cn(
                       "flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition touch-manipulation",
-                      mealMode === "photo" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-500"
+                      mealMode === "photo" ? "bg-white text-navy-800 shadow-sm" : "text-slate-500"
                     )}
                   >
                     <Camera className="w-4 h-4" />
@@ -230,7 +230,7 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
                     value={mealName}
                     onChange={(e) => setMealName(e.target.value)}
                     placeholder="Ej: Milanesa con ensalada y mate"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-base"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none text-base"
                     autoFocus
                   />
                   <p className="text-xs text-slate-400 mt-1.5">
@@ -239,20 +239,20 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
                 </div>
 
                 {(analyzing || nutrition) && (
-                  <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4">
+                  <div className="rounded-xl bg-teal-50 border border-teal-200 p-4">
                     <div className="flex items-center gap-2 mb-2">
                       {analyzing ? (
-                        <Loader2 className="w-4 h-4 text-emerald-600 animate-spin" />
+                        <Loader2 className="w-4 h-4 text-teal-700 animate-spin" />
                       ) : (
-                        <Sparkles className="w-4 h-4 text-emerald-600" />
+                        <Sparkles className="w-4 h-4 text-teal-700" />
                       )}
-                      <span className="text-sm font-medium text-emerald-800">
+                      <span className="text-sm font-medium text-navy-800">
                         {analyzing ? "Analizando nutrientes..." : "Análisis automático"}
                       </span>
                     </div>
                     {nutrition && !analyzing && (
                       <>
-                        <p className="text-xs text-emerald-700 mb-2">
+                        <p className="text-xs text-navy-700 mb-2">
                           Porción: {nutrition.servingSize}
                         </p>
                         <div className="grid grid-cols-2 gap-2 text-xs">
@@ -265,9 +265,9 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
                           <NutrientBadge label="Grasa sat." value={`${nutrition.saturatedFat}g`} />
                           <NutrientBadge label="Sodio" value={`${nutrition.sodium}mg`} />
                         </div>
-                        <p className="text-[10px] text-emerald-600/80 mt-2 flex items-center justify-between gap-2">
+                        <p className="text-[10px] text-teal-700/80 mt-2 flex items-center justify-between gap-2">
                           <span>{formatNutritionSummary(nutrition)}</span>
-                          <span className="shrink-0 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 font-medium">
+                          <span className="shrink-0 px-1.5 py-0.5 rounded bg-teal-100 text-navy-700 font-medium">
                             {getSourceLabel(nutrition.source)} · {nutrition.confidence}
                           </span>
                         </p>
@@ -279,7 +279,7 @@ export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickAc
                 <button
                   type="submit"
                   disabled={loading || !mealName.trim() || analyzing}
-                  className="w-full py-3 rounded-xl bg-emerald-600 text-white font-medium disabled:opacity-50 touch-manipulation"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-navy-800 to-teal-700 text-white font-medium disabled:opacity-50 touch-manipulation"
                 >
                   {loading ? "Guardando..." : analyzing ? "Analizando..." : "Registrar comida"}
                 </button>

@@ -160,12 +160,12 @@ export function DashboardApp() {
         <button
           type="button"
           onClick={fetchUser}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#1e5a9e] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#174a82] transition-colors"
+          className="inline-flex items-center gap-2 rounded-xl bg-navy-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-navy-800 transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
           Reintentar
         </button>
-        <Link href="/" className="text-sm text-[#1e5a9e] hover:underline">
+        <Link href="/" className="text-sm text-navy-700 hover:underline">
           Volver al inicio
         </Link>
       </div>
@@ -177,53 +177,66 @@ export function DashboardApp() {
   }
 
   const tabs: { key: Tab; label: string; icon: typeof LayoutDashboard }[] = [
-    { key: "dashboard", label: "Panel", icon: LayoutDashboard },
+    { key: "dashboard", label: "Inicio", icon: LayoutDashboard },
     { key: "historial", label: "Historial", icon: Activity },
-    { key: "chat", label: "Chat IA", icon: MessageSquare },
+    { key: "chat", label: "Asistente", icon: MessageSquare },
     { key: "perfil", label: "Perfil", icon: Settings },
   ];
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 safe-bottom">
-      <header className="sticky top-0 z-30 glass-card border-b border-white/60 safe-top animate-fade-in">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <IPSLogo size="sm" className="shrink-0" />
+      <header className="sticky top-0 z-30 glass-card border-b border-teal-100/80 safe-top animate-fade-in">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="shrink-0 rounded-xl bg-white px-2 py-1.5 shadow-sm ring-1 ring-slate-100">
+              <IPSLogo size="sm" />
+            </div>
             <div className="min-w-0">
               <BrandMark size="sm" />
               <p className="text-xs text-slate-500 truncate">Hola, {user.name}</p>
             </div>
           </div>
-          <Link
-            href="/descargar"
-            className="hidden sm:flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 font-medium shrink-0"
-          >
-            <Download className="w-3.5 h-3.5" />
-            Instalar
-          </Link>
-          <div className="hidden md:flex gap-1 bg-slate-100 rounded-xl p-1">
-            {tabs.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition",
-                  tab === t.key
-                    ? "bg-white text-emerald-700 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                )}
-              >
-                <t.icon className="w-4 h-4" />
-                {t.label}
-              </button>
-            ))}
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/descargar"
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-navy-700 hover:text-navy-800 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Instalar
+            </Link>
+            <div className="hidden md:flex gap-1 bg-slate-100/90 rounded-xl p-1">
+              {tabs.map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition",
+                    tab === t.key
+                      ? "bg-gradient-to-r from-navy-800 to-teal-700 text-white shadow-sm"
+                      : "text-slate-500 hover:text-navy-800"
+                  )}
+                >
+                  <t.icon className="w-4 h-4" />
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        {(tab === "dashboard" || tab === "historial") && (
+        {tab === "dashboard" && (
           <>
+            <div>
+              <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-teal-700 mb-1">
+                Hoy
+              </p>
+              <h2 className="font-display text-2xl font-semibold text-navy-900">
+                Tu seguimiento
+              </h2>
+            </div>
+
             <QuickActions
               onSuccess={fetchDashboard}
               openGlucose={showGlucoseModal}
@@ -282,36 +295,57 @@ export function DashboardApp() {
           </>
         )}
 
-        {(tab === "historial" || tab === "dashboard") && data && (
-          <HistoryPanel
-            period={period}
-            onPeriodChange={(p) => {
-              setPeriod(p);
-            }}
-            meals={data.meals}
-            readings={data.readings}
-          />
+        {tab === "historial" && data && (
+          <>
+            <div>
+              <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-teal-700 mb-1">
+                Evolución
+              </p>
+              <h2 className="font-display text-2xl font-semibold text-navy-900">
+                Historial y tendencias
+              </h2>
+            </div>
+            <div className="grid lg:grid-cols-2 gap-6">
+              <GlucoseChart
+                readings={data.readings}
+                targetMin={user.targetMin}
+                targetMax={user.targetMax}
+              />
+              <BpChart
+                readings={data.bloodPressures ?? []}
+                targetSys={user.bpTargetSys ?? 130}
+                targetDia={user.bpTargetDia ?? 80}
+              />
+            </div>
+            <WeightChart entries={data.weights ?? []} heightCm={user.heightCm} />
+            <HistoryPanel
+              period={period}
+              onPeriodChange={setPeriod}
+              meals={data.meals}
+              readings={data.readings}
+            />
+          </>
         )}
 
         {tab === "chat" && <ChatPanel userName={user.name} />}
 
-        {tab === "perfil" && (
-          <ProfilePanel user={user} onUpdate={fetchUser} />
-        )}
+        {tab === "perfil" && <ProfilePanel user={user} onUpdate={fetchUser} />}
       </main>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-card border-t border-white/60 z-30 safe-bottom-nav">
-        <div className="flex justify-around py-2">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-card border-t border-teal-100/80 z-30 safe-bottom-nav">
+        <div className="flex justify-around py-1.5">
           {tabs.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                "flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg text-xs transition",
-                tab === t.key ? "text-emerald-600" : "text-slate-400"
+                "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-[11px] font-medium transition touch-manipulation min-w-[4.25rem]",
+                tab === t.key
+                  ? "text-navy-800 bg-teal-50"
+                  : "text-slate-400 hover:text-slate-600"
               )}
             >
-              <t.icon className="w-5 h-5" />
+              <t.icon className={cn("w-5 h-5", tab === t.key && "text-teal-700")} />
               {t.label}
             </button>
           ))}
@@ -400,7 +434,7 @@ function ProfilePanel({
   return (
     <div className="space-y-4 max-w-lg">
       <div className="glass-card rounded-2xl p-6">
-        <h3 className="font-semibold text-slate-800 mb-4">Mi cuenta</h3>
+        <h3 className="font-display text-lg font-semibold text-navy-900 mb-4">Mi cuenta</h3>
         {user.email && (
           <p className="text-sm text-slate-500 mb-4">
             Sesión: <span className="text-slate-700">{user.email}</span>
@@ -411,7 +445,7 @@ function ProfilePanel({
             href="/api/export?format=html"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl border border-emerald-300 text-emerald-700 text-sm font-medium hover:bg-emerald-50 transition touch-manipulation"
+            className="inline-flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl border border-teal-300 text-navy-700 text-sm font-medium hover:bg-teal-50 transition touch-manipulation"
           >
             <FileText className="w-4 h-4" />
             Exportar informe
@@ -431,7 +465,7 @@ function ProfilePanel({
       </div>
 
       <div className="glass-card rounded-2xl p-6">
-        <h3 className="font-semibold text-slate-800 mb-4">Mi perfil de salud</h3>
+        <h3 className="font-display text-lg font-semibold text-navy-900 mb-4">Mi perfil de salud</h3>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
             <label className="text-sm text-slate-600 mb-1 block">Nombre</label>
@@ -439,7 +473,7 @@ function ProfilePanel({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-400 outline-none"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-teal-500 outline-none"
             />
           </div>
           <div>
@@ -463,7 +497,7 @@ function ProfilePanel({
               value={heightCm}
               onChange={(e) => setHeightCm(e.target.value)}
               placeholder="165"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-400 outline-none"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-teal-500 outline-none"
             />
           </div>
           <div>
@@ -483,7 +517,7 @@ function ProfilePanel({
                     className={cn(
                       "px-3 py-1.5 rounded-full text-xs font-medium border transition",
                       selected
-                        ? "bg-emerald-100 border-emerald-300 text-emerald-800"
+                        ? "bg-teal-100 border-teal-300 text-navy-800"
                         : "bg-white border-slate-200 text-slate-600"
                     )}
                   >
@@ -500,12 +534,12 @@ function ProfilePanel({
               value={doctorName}
               onChange={(e) => setDoctorName(e.target.value)}
               placeholder="Ej: Dr. García"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-400 outline-none"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-teal-500 outline-none"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-2.5 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition touch-manipulation"
+            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-navy-800 to-teal-700 text-white font-medium hover:opacity-95 transition touch-manipulation"
           >
             {saved ? "Guardado ✓" : "Guardar perfil"}
           </button>
@@ -513,7 +547,7 @@ function ProfilePanel({
       </div>
 
       <div className="glass-card rounded-2xl p-6">
-        <h3 className="font-semibold text-slate-800 mb-1">Recordatorios</h3>
+        <h3 className="font-display text-lg font-semibold text-navy-900 mb-1">Recordatorios</h3>
         <p className="text-xs text-slate-500 mb-4">
           Notificaciones en su celular para glucosa, comidas y medicación
         </p>
@@ -526,7 +560,7 @@ function ProfilePanel({
               onClick={() => setNotificationsEnabled(!notificationsEnabled)}
               className={cn(
                 "w-12 h-7 rounded-full transition relative",
-                notificationsEnabled ? "bg-emerald-500" : "bg-slate-300"
+                notificationsEnabled ? "bg-teal-600" : "bg-slate-300"
               )}
             >
               <span
@@ -541,11 +575,11 @@ function ProfilePanel({
           <button
             type="button"
             onClick={enableNotifications}
-            className="w-full py-2 rounded-xl border border-emerald-300 text-emerald-700 text-sm font-medium touch-manipulation"
+            className="w-full py-2 rounded-xl border border-teal-300 text-navy-700 text-sm font-medium touch-manipulation"
           >
             Activar permisos de notificación
           </button>
-          {notifStatus && <p className="text-xs text-emerald-600">{notifStatus}</p>}
+          {notifStatus && <p className="text-xs text-teal-700">{notifStatus}</p>}
 
           <div>
             <label className="text-sm text-slate-600 mb-1 block">
@@ -603,7 +637,7 @@ function ProfilePanel({
               <button
                 type="button"
                 onClick={addMedication}
-                className="px-3 py-2 rounded-lg bg-emerald-100 text-emerald-700 text-sm font-medium"
+                className="px-3 py-2 rounded-lg bg-teal-100 text-navy-800 text-sm font-medium"
               >
                 +
               </button>
@@ -613,7 +647,7 @@ function ProfilePanel({
           <button
             type="button"
             onClick={() => handleSave({ preventDefault: () => {} } as React.FormEvent)}
-            className="w-full py-2.5 rounded-xl bg-teal-600 text-white font-medium touch-manipulation"
+            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-navy-800 to-teal-700 text-white font-medium touch-manipulation"
           >
             Guardar recordatorios
           </button>

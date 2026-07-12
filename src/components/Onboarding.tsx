@@ -93,7 +93,7 @@ export function Onboarding({ onComplete, initialName }: OnboardingProps) {
               key={n}
               className={cn(
                 "h-1.5 flex-1 rounded-full",
-                step >= n ? "bg-emerald-500" : "bg-slate-200"
+                step >= n ? "bg-teal-600" : "bg-slate-200"
               )}
             />
           ))}
@@ -117,7 +117,7 @@ export function Onboarding({ onComplete, initialName }: OnboardingProps) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej: María"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-400 outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal-500 outline-none"
                   autoFocus
                 />
               </div>
@@ -130,7 +130,7 @@ export function Onboarding({ onComplete, initialName }: OnboardingProps) {
                   value={doctorName}
                   onChange={(e) => setDoctorName(e.target.value)}
                   placeholder="Ej: Dr. García"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-400 outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal-500 outline-none"
                 />
               </div>
               <div>
@@ -144,7 +144,7 @@ export function Onboarding({ onComplete, initialName }: OnboardingProps) {
                   placeholder="Ej: 165"
                   min={100}
                   max={250}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-400 outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal-500 outline-none"
                 />
               </div>
               <button
@@ -157,7 +157,7 @@ export function Onboarding({ onComplete, initialName }: OnboardingProps) {
                   setError("");
                   setStep(2);
                 }}
-                className="w-full py-3 rounded-xl bg-emerald-600 text-white font-medium"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-navy-800 to-teal-700 text-white font-medium"
               >
                 Continuar
               </button>
@@ -183,7 +183,7 @@ export function Onboarding({ onComplete, initialName }: OnboardingProps) {
                       className={cn(
                         "w-full text-left px-4 py-3 rounded-xl border transition touch-manipulation",
                         selected
-                          ? "border-emerald-400 bg-emerald-50"
+                          ? "border-teal-500 bg-teal-50"
                           : "border-slate-200 bg-white"
                       )}
                     >
@@ -211,7 +211,7 @@ export function Onboarding({ onComplete, initialName }: OnboardingProps) {
                     setError("");
                     setStep(3);
                   }}
-                  className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-medium"
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-navy-800 to-teal-700 text-white font-medium"
                 >
                   Continuar
                 </button>
@@ -286,7 +286,7 @@ export function Onboarding({ onComplete, initialName }: OnboardingProps) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-medium disabled:opacity-50"
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-navy-800 to-teal-700 text-white font-medium disabled:opacity-50"
                 >
                   {loading ? "Guardando..." : "Empezar"}
                 </button>

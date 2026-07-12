@@ -200,8 +200,8 @@ export function VoiceAssistant({ userName, onMealLogged }: VoiceAssistantProps) 
           "fixed bottom-6 right-6 z-40 w-14 h-14 md:w-16 md:h-16 rounded-full shadow-xl flex items-center justify-center transition-all active:scale-95 touch-manipulation",
           "mb-[env(safe-area-inset-bottom,0px)]",
           speaking || listening
-            ? "bg-gradient-to-br from-teal-500 to-emerald-600 pulse-ring"
-            : "bg-gradient-to-br from-emerald-500 to-teal-600"
+            ? "bg-gradient-to-br from-navy-700 to-teal-600 pulse-ring"
+            : "bg-gradient-to-br from-navy-800 to-teal-700"
         )}
         title="Asistente de voz"
       >
@@ -232,13 +232,13 @@ export function VoiceAssistant({ userName, onMealLogged }: VoiceAssistantProps) 
                 Array.from({ length: 5 }).map((_, i) => (
                   <div
                     key={i}
-                    className="w-1.5 bg-emerald-500 rounded-full voice-wave"
+                    className="w-1.5 bg-teal-600 rounded-full voice-wave"
                     style={{ animationDelay: `${i * 0.1}s` }}
                   />
                 ))}
               {!speaking && !listening && (
-                <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <Mic className="w-8 h-8 text-emerald-600" />
+                <div className="w-20 h-20 rounded-full bg-teal-100 flex items-center justify-center">
+                  <Mic className="w-8 h-8 text-teal-700" />
                 </div>
               )}
             </div>
@@ -250,7 +250,7 @@ export function VoiceAssistant({ userName, onMealLogged }: VoiceAssistantProps) 
             )}
 
             {response && (
-              <p className="text-sm text-emerald-800 bg-emerald-50 rounded-xl p-3 mb-4 text-center leading-relaxed">
+              <p className="text-sm text-navy-800 bg-teal-50 rounded-xl p-3 mb-4 text-center leading-relaxed">
                 {response}
               </p>
             )}
@@ -262,7 +262,7 @@ export function VoiceAssistant({ userName, onMealLogged }: VoiceAssistantProps) 
                 "w-full py-3.5 rounded-xl font-medium flex items-center justify-center gap-2 transition",
                 listening
                   ? "bg-red-100 text-red-700"
-                  : "bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+                  : "bg-gradient-to-r from-navy-800 to-teal-700 text-white hover:opacity-95 disabled:opacity-50"
               )}
             >
               {listening ? (

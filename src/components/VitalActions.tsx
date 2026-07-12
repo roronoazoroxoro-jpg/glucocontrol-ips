@@ -135,11 +135,11 @@ export function VitalActions({ onSuccess }: VitalActionsProps) {
   }
 
   const actions = [
-    { key: "bp" as const, label: "Presión", icon: Activity, color: "from-rose-500 to-red-600" },
-    { key: "weight" as const, label: "Peso", icon: Scale, color: "from-amber-500 to-orange-600" },
-    { key: "hr" as const, label: "Pulso", icon: HeartPulse, color: "from-pink-500 to-rose-600" },
-    { key: "chol" as const, label: "Colesterol", icon: Droplets, color: "from-violet-500 to-purple-600" },
-    { key: "symptom" as const, label: "Síntoma", icon: TriangleAlert, color: "from-slate-600 to-slate-800" },
+    { key: "bp" as const, label: "Presión", icon: Activity, color: "from-navy-700 to-navy-800" },
+    { key: "weight" as const, label: "Peso", icon: Scale, color: "from-teal-600 to-teal-700" },
+    { key: "hr" as const, label: "Pulso", icon: HeartPulse, color: "from-navy-600 to-teal-700" },
+    { key: "chol" as const, label: "Colesterol", icon: Droplets, color: "from-teal-700 to-navy-800" },
+    { key: "symptom" as const, label: "Síntoma", icon: TriangleAlert, color: "from-slate-600 to-navy-900" },
   ];
 
   return (
@@ -150,12 +150,12 @@ export function VitalActions({ onSuccess }: VitalActionsProps) {
             key={a.key}
             type="button"
             onClick={() => setModal(a.key)}
-            className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 transition touch-manipulation"
+            className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl bg-white/90 border border-teal-100 hover:border-teal-300 hover:shadow-md hover:shadow-teal-900/5 transition touch-manipulation"
           >
-            <span className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center text-white", a.color)}>
+            <span className={cn("w-9 h-9 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-sm", a.color)}>
               <a.icon className="w-4 h-4" />
             </span>
-            <span className="text-[10px] font-medium text-slate-600 text-center leading-tight">
+            <span className="text-[10px] font-semibold text-slate-600 text-center leading-tight">
               {a.label}
             </span>
           </button>
@@ -314,7 +314,7 @@ export function VitalActions({ onSuccess }: VitalActionsProps) {
               </div>
 
               {msg && (
-                <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
+                <p className="text-sm text-navy-700 bg-teal-50 border border-teal-100 rounded-xl px-3 py-2">
                   {msg}
                 </p>
               )}
@@ -322,7 +322,7 @@ export function VitalActions({ onSuccess }: VitalActionsProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-emerald-600 text-white font-medium disabled:opacity-50 touch-manipulation"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-navy-800 to-teal-700 text-white font-medium disabled:opacity-50 touch-manipulation"
               >
                 {loading ? "Guardando..." : "Guardar"}
               </button>

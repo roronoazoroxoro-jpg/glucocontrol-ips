@@ -63,7 +63,7 @@ export function HistoryPanel({
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="font-semibold text-slate-800">Historial</h3>
+        <h3 className="font-display text-lg font-semibold text-navy-900">Historial</h3>
         <div className="flex bg-slate-100 rounded-lg p-0.5">
           {PERIODS.map((p) => (
             <button
@@ -72,7 +72,7 @@ export function HistoryPanel({
               className={cn(
                 "px-3 py-1.5 rounded-md text-xs font-medium transition",
                 period === p.key
-                  ? "bg-white text-emerald-700 shadow-sm"
+                  ? "bg-white text-navy-700 shadow-sm"
                   : "text-slate-500 hover:text-slate-700"
               )}
             >
@@ -96,15 +96,15 @@ export function HistoryPanel({
               <div
                 className={cn(
                   "w-9 h-9 rounded-lg flex items-center justify-center shrink-0",
-                  item.type === "glucose" ? "bg-emerald-100" : "bg-blue-100"
+                  item.type === "glucose" ? "bg-teal-100" : "bg-navy-700/10"
                 )}
               >
                 {item.type === "glucose" ? (
-                  <span className="text-emerald-700 text-xs font-bold">G</span>
+                  <span className="text-navy-800 text-xs font-bold">G</span>
                 ) : item.sub.includes("bebida") ? (
-                  <Coffee className="w-4 h-4 text-blue-600" />
+                  <Coffee className="w-4 h-4 text-navy-700" />
                 ) : (
-                  <Utensils className="w-4 h-4 text-blue-600" />
+                  <Utensils className="w-4 h-4 text-teal-700" />
                 )}
               </div>
               <div className="flex-1 min-w-0">

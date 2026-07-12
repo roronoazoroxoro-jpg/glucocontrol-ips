@@ -16,7 +16,7 @@ export function GlucoseCard({ value, recommendation, onAddReading }: GlucoseCard
     if (recommendation.urgency === "emergency")
       return <AlertTriangle className="w-5 h-5 text-red-600" />;
     if (recommendation.status === "normal")
-      return <CheckCircle className="w-5 h-5 text-emerald-600" />;
+      return <CheckCircle className="w-5 h-5 text-teal-600" />;
     if (recommendation.status === "bajo" || recommendation.status === "critico_bajo")
       return <TrendingDown className="w-5 h-5 text-orange-600" />;
     return <TrendingUp className="w-5 h-5 text-amber-600" />;
@@ -26,15 +26,15 @@ export function GlucoseCard({ value, recommendation, onAddReading }: GlucoseCard
     <div className="glass-card rounded-2xl p-6 md:p-8">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">
+          <p className="text-[11px] font-semibold tracking-[0.14em] uppercase text-teal-700">
             Glucosa actual
           </p>
           {value !== null ? (
             <div className="flex items-baseline gap-2 mt-1">
               <span
                 className={cn(
-                  "text-5xl md:text-6xl font-bold tabular-nums",
-                  recommendation?.color ?? "text-slate-800"
+                  "font-display text-5xl md:text-6xl font-semibold tabular-nums",
+                  recommendation?.color ?? "text-navy-900"
                 )}
               >
                 {value}
@@ -42,7 +42,7 @@ export function GlucoseCard({ value, recommendation, onAddReading }: GlucoseCard
               <span className="text-lg text-slate-400">mg/dL</span>
             </div>
           ) : (
-            <p className="text-3xl font-bold text-slate-300 mt-2">— — —</p>
+            <p className="font-display text-3xl font-semibold text-slate-300 mt-2">— — —</p>
           )}
         </div>
         {recommendation && (
@@ -63,13 +63,13 @@ export function GlucoseCard({ value, recommendation, onAddReading }: GlucoseCard
         <p className="text-slate-600 leading-relaxed mb-4">{recommendation.message}</p>
       ) : (
         <p className="text-slate-500 mb-4">
-          Registra tu primer valor de glucosa para recibir recomendaciones.
+          Registrá tu primer valor de glucosa para recibir recomendaciones.
         </p>
       )}
 
       <button
         onClick={onAddReading}
-        className="w-full py-2.5 rounded-xl border-2 border-dashed border-emerald-300 text-emerald-700 font-medium hover:bg-emerald-50 transition text-sm"
+        className="w-full py-2.5 rounded-xl border-2 border-dashed border-teal-300 text-navy-800 font-semibold hover:bg-teal-50 transition text-sm touch-manipulation"
       >
         + Registrar glucosa
       </button>

@@ -53,7 +53,7 @@ export function InstallPrompt() {
   if (isIOS) {
     return (
       <div className="fixed bottom-20 left-4 right-4 z-40 md:bottom-6 md:left-auto md:right-24 md:max-w-sm">
-        <div className="glass-card rounded-2xl p-4 shadow-lg border border-emerald-200">
+        <div className="glass-card rounded-2xl p-4 shadow-lg border border-teal-200">
           <div className="flex justify-between items-start gap-2 mb-2">
             <p className="text-sm font-semibold text-slate-800">Instalar en iPhone</p>
             <button onClick={handleDismiss} className="p-1 hover:bg-slate-100 rounded-lg">
@@ -73,7 +73,7 @@ export function InstallPrompt() {
 
   return (
     <div className="fixed bottom-20 left-4 right-4 z-40 md:bottom-6 md:left-auto md:right-24 md:max-w-sm">
-      <div className="glass-card rounded-2xl p-4 shadow-lg border border-emerald-200">
+      <div className="glass-card rounded-2xl p-4 shadow-lg border border-teal-200">
         <div className="flex justify-between items-start gap-2 mb-3">
           <div>
             <p className="text-sm font-semibold text-slate-800">Instalar VitalIPS</p>
@@ -87,7 +87,7 @@ export function InstallPrompt() {
         </div>
         <button
           onClick={handleInstall}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-navy-800 to-teal-700 text-white text-sm font-medium hover:bg-navy-800 transition"
         >
           <Download className="w-4 h-4" />
           Instalar aplicación

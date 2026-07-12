@@ -38,7 +38,7 @@ export function GlucoseChart({ readings, targetMin = 70, targetMax = 140 }: Gluc
 
   return (
     <div className="glass-card rounded-2xl p-6">
-      <h3 className="font-semibold text-slate-800 mb-4">Tendencia de glucosa</h3>
+      <h3 className="font-display text-lg font-semibold text-navy-900 mb-4">Tendencia de glucosa</h3>
       <ResponsiveContainer width="100%" height={240}>
         <LineChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -57,10 +57,10 @@ export function GlucoseChart({ readings, targetMin = 70, targetMax = 140 }: Gluc
           <Line
             type="monotone"
             dataKey="glucosa"
-            stroke="#10b981"
+            stroke="#0b4f8c"
             strokeWidth={2.5}
-            dot={{ fill: "#10b981", r: 4 }}
-            activeDot={{ r: 6 }}
+            dot={{ fill: "#0d9488", r: 4 }}
+            activeDot={{ r: 6, fill: "#0b4f8c" }}
           />
         </LineChart>
       </ResponsiveContainer>

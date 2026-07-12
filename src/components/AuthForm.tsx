@@ -89,7 +89,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                   onChange={(e) => setName(e.target.value)}
                   required
                   autoComplete="name"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none"
                   placeholder="Ej: María"
                 />
               </div>
@@ -105,7 +105,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none"
                 placeholder="tu@email.com"
               />
             </div>
@@ -122,7 +122,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                   required
                   minLength={isRegister ? 8 : 1}
                   autoComplete={isRegister ? "new-password" : "current-password"}
-                  className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none"
+                  className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none"
                   placeholder={isRegister ? "Mínimo 8 caracteres" : "Tu contraseña"}
                 />
                 <button
@@ -147,11 +147,11 @@ export function AuthForm({ mode }: AuthFormProps) {
                 />
                 <span>
                   Acepto los{" "}
-                  <Link href="/terminos" className="text-emerald-700 underline" target="_blank">
+                  <Link href="/terminos" className="text-navy-700 underline" target="_blank">
                     Términos de uso
                   </Link>{" "}
                   y la{" "}
-                  <Link href="/privacidad" className="text-emerald-700 underline" target="_blank">
+                  <Link href="/privacidad" className="text-navy-700 underline" target="_blank">
                     Política de privacidad
                   </Link>
                   . Entiendo que esta app no reemplaza la consulta médica.
@@ -166,7 +166,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold shadow-lg shadow-emerald-200 active:scale-[0.98] transition disabled:opacity-60 touch-manipulation"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-navy-800 to-teal-700 text-white font-semibold shadow-lg shadow-teal-800/20 active:scale-[0.98] transition disabled:opacity-60 touch-manipulation"
             >
               {loading ? "Procesando..." : isRegister ? "Crear cuenta" : "Entrar"}
             </button>
@@ -176,14 +176,14 @@ export function AuthForm({ mode }: AuthFormProps) {
             {isRegister ? (
               <>
                 ¿Ya tenés cuenta?{" "}
-                <Link href={`/login${next !== "/app" ? `?next=${encodeURIComponent(next)}` : ""}`} className="text-emerald-700 font-medium hover:underline">
+                <Link href={`/login${next !== "/app" ? `?next=${encodeURIComponent(next)}` : ""}`} className="text-navy-700 font-medium hover:underline">
                   Iniciar sesión
                 </Link>
               </>
             ) : (
               <>
                 ¿Primera vez?{" "}
-                <Link href={`/registro${next !== "/app" ? `?next=${encodeURIComponent(next)}` : ""}`} className="text-emerald-700 font-medium hover:underline">
+                <Link href={`/registro${next !== "/app" ? `?next=${encodeURIComponent(next)}` : ""}`} className="text-navy-700 font-medium hover:underline">
                   Crear cuenta gratis
                 </Link>
               </>
