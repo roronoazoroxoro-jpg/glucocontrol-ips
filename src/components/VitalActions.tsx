@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Activity,
   Droplets,
@@ -15,19 +15,11 @@ import { useToast } from "./Toast";
 
 interface VitalActionsProps {
   onSuccess: () => void;
-  hideButtons?: boolean;
-  openModal?: "bp" | "weight" | "hr" | "chol" | "symptom" | null;
-  onModalClose?: () => void;
 }
 
 type VitalModal = "bp" | "weight" | "hr" | "chol" | "symptom" | null;
 
-export function VitalActions({
-  onSuccess,
-  hideButtons = false,
-  openModal = null,
-  onModalClose,
-}: VitalActionsProps) {
+export function VitalActions({ onSuccess }: VitalActionsProps) {
   const { toast } = useToast();
   const [modal, setModal] = useState<VitalModal>(null);
   const [loading, setLoading] = useState(false);
@@ -47,15 +39,10 @@ export function VitalActions({
   const [severity, setSeverity] = useState(2);
   const [notes, setNotes] = useState("");
 
-  useEffect(() => {
-    if (openModal) setModal(openModal);
-  }, [openModal]);
-
   function close() {
     setModal(null);
     setMsg(null);
     setNotes("");
-    onModalClose?.();
   }
 
   async function submit(e: React.FormEvent) {
@@ -157,7 +144,6 @@ export function VitalActions({
 
   return (
     <>
-      {!hideButtons && (
       <div className="grid grid-cols-5 gap-2">
         {actions.map((a) => (
           <button
@@ -175,7 +161,6 @@ export function VitalActions({
           </button>
         ))}
       </div>
-      )}
 
       {modal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4 safe-bottom">

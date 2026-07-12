@@ -12,19 +12,9 @@ interface QuickActionsProps {
   onSuccess: () => void;
   openGlucose?: boolean;
   onGlucoseClose?: () => void;
-  openMeal?: boolean;
-  onMealClose?: () => void;
-  hideButtons?: boolean;
 }
 
-export function QuickActions({
-  onSuccess,
-  openGlucose,
-  onGlucoseClose,
-  openMeal,
-  onMealClose,
-  hideButtons = false,
-}: QuickActionsProps) {
+export function QuickActions({ onSuccess, openGlucose, onGlucoseClose }: QuickActionsProps) {
   const { toast } = useToast();
   const [showGlucose, setShowGlucose] = useState(false);
   const [showMeal, setShowMeal] = useState(false);
@@ -43,15 +33,6 @@ export function QuickActions({
     }
   }, [openGlucose]);
 
-  useEffect(() => {
-    if (openMeal) {
-      setShowMeal(true);
-      setShowGlucose(false);
-      setNutrition(null);
-      setMealMode("text");
-    }
-  }, [openMeal]);
-
   function closeGlucose() {
     setShowGlucose(false);
     onGlucoseClose?.();
@@ -62,7 +43,6 @@ export function QuickActions({
     setNutrition(null);
     setShowMeal(false);
     setMealMode("text");
-    onMealClose?.();
   }
 
   useEffect(() => {
@@ -134,7 +114,6 @@ export function QuickActions({
 
   return (
     <>
-      {!hideButtons && (
       <div className="flex gap-3">
         <button
           onClick={() => { setShowGlucose(true); setShowMeal(false); }}
@@ -151,7 +130,6 @@ export function QuickActions({
           Comida / Bebida
         </button>
       </div>
-      )}
 
       {(showGlucose || showMeal) && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4 safe-bottom">
