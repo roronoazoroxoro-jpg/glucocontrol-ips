@@ -67,13 +67,13 @@ export function AuthForm({ mode }: AuthFormProps) {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="glass-card rounded-3xl p-6 md:p-10 max-w-md w-full animate-scale-in">
           <div className="flex flex-col items-center mb-8">
-            <IPSLogo size="lg" showText />
-            <BrandMark size="md" className="mt-4" />
+            <IPSLogo size="md" />
+            <BrandMark size="md" className="mt-5" />
             <h1 className="text-lg font-semibold text-slate-700 mt-3">
               {isRegister ? "Crear cuenta" : "Iniciar sesión"}
             </h1>
             <p className="text-sm text-slate-500 mt-1 text-center">
-              Salud integral · Posadas, Misiones
+              Instituto de Previsión Social · Posadas, Misiones
             </p>
           </div>
 

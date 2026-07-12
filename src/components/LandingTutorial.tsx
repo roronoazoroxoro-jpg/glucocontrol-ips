@@ -160,8 +160,8 @@ const GUIDES: Record<
 
 const FAQ = [
   {
-    q: "¿VitalIPS reemplaza a Alegramed o a la consulta médica?",
-    a: "No. Alegramed se enfoca en turnos, teleconsulta y recetas. VitalIPS es el seguimiento diario entre consultas (glucosa, presión, peso, comida). Se complementan: el médico te atiende y, entre medio, vos registrás cómo vas.",
+    q: "¿VitalIPS reemplaza a la consulta médica?",
+    a: "No. VitalIPS es el seguimiento diario entre consultas: glucosa, presión, peso, comida y síntomas. Te ayuda a vos y le da datos reales a tu equipo médico del IPS para decidir mejor.",
   },
   {
     q: "¿Mi médico del IPS ve lo que cargo?",

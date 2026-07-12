@@ -78,11 +78,11 @@ export function Onboarding({ onComplete, initialName }: OnboardingProps) {
     <div className="min-h-screen flex items-center justify-center p-4 safe-top">
       <div className="glass-card rounded-3xl p-6 md:p-10 max-w-lg w-full animate-scale-in">
         <div className="flex flex-col items-center mb-6 pt-2">
-          <IPSLogo size="lg" showText />
-          <div className="mt-4 text-center">
+          <IPSLogo size="md" />
+          <div className="mt-5 text-center">
             <BrandMark size="md" />
             <p className="text-sm text-slate-500 mt-1">
-              Salud integral · Posadas, Misiones
+              Instituto de Previsión Social · Posadas, Misiones
             </p>
           </div>
         </div>

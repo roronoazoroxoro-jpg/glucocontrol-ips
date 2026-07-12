@@ -52,8 +52,8 @@ export function AdminLoginForm() {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="glass-card rounded-3xl p-6 md:p-10 max-w-md w-full border border-blue-100 animate-scale-in">
           <div className="flex flex-col items-center mb-8">
-            <IPSLogo size="lg" showText />
-            <BrandMark size="md" className="mt-4" />
+            <IPSLogo size="md" />
+            <BrandMark size="md" className="mt-5" />
             <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">
               <Stethoscope className="w-3.5 h-3.5" />
               Panel médico IPS

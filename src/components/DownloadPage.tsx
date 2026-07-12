@@ -74,19 +74,19 @@ export function DownloadPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-navy-900/50 via-transparent to-teal-900/35" />
 
         <nav className="relative z-20 px-4 pt-5 flex items-center justify-between max-w-6xl mx-auto w-full animate-fade-in">
-          <div className="inline-flex items-center rounded-xl bg-white/95 px-3 py-2 shadow-md shadow-black/15">
-            <IPSLogo size="sm" showText />
+          <div className="inline-flex items-center rounded-2xl bg-white px-3.5 py-2.5 shadow-lg shadow-black/20 ring-1 ring-white/60">
+            <IPSLogo size="sm" />
           </div>
-          <div className="flex items-center gap-4 sm:gap-5">
+          <div className="flex items-center gap-1 sm:gap-2">
             <a
               href="#tutorial"
-              className="text-xs font-medium text-white/90 hover:text-white transition"
+              className="text-xs font-semibold text-white/95 hover:text-white transition px-3 py-2 rounded-full hover:bg-white/10"
             >
               Cómo funciona
             </a>
             <Link
               href="/admin/login"
-              className="text-xs font-medium text-white/70 hover:text-white transition"
+              className="text-xs font-medium text-white/80 hover:text-white transition px-3 py-2 rounded-full border border-white/25 hover:bg-white/10"
             >
               Acceso médico
             </Link>
