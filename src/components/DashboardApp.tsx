@@ -15,7 +15,10 @@ import { ChatPanel } from "./ChatPanel";
 import { VoiceAssistant } from "./VoiceAssistant";
 import { InstallPrompt } from "./InstallPrompt";
 import { NotificationScheduler, UpcomingRemindersBanner } from "./NotificationScheduler";
+import { VitalActions } from "./VitalActions";
+import { HealthVitalsPanel } from "./HealthVitalsPanel";
 import { parseMedications, parseMealTimes, DEFAULT_REMINDERS, type Medication } from "@/lib/reminders";
+import { parseConditions, HEALTH_CONDITIONS } from "@/lib/health";
 import type { GlucoseAnalysis } from "@/lib/recommendations";
 import type { StatsSummary, Period } from "@/lib/stats";
 import { cn } from "@/lib/utils";
@@ -25,8 +28,12 @@ interface User {
   email?: string;
   name: string;
   diabetesType: string;
+  conditions?: string;
+  heightCm?: number | null;
   targetMin: number;
   targetMax: number;
+  bpTargetSys?: number;
+  bpTargetDia?: number;
   doctorName?: string | null;
   medications?: string | null;
   mealTimes?: string | null;
@@ -51,6 +58,23 @@ interface DashboardData {
   latest: { value: number } | null;
   stats: StatsSummary;
   recommendation: GlucoseAnalysis | null;
+  conditions?: string[];
+  latestBp: { systolic: number; diastolic: number; pulse?: number | null; createdAt: string } | null;
+  bpStatus: { label: string; alert: boolean; color: string } | null;
+  latestWeight: { weightKg: number; createdAt: string } | null;
+  bmi: number | null;
+  bmiCategory: { label: string } | null;
+  latestHr: { bpm: number; context: string; createdAt: string } | null;
+  hrStatus: { label: string; alert: boolean } | null;
+  latestChol: {
+    total?: number | null;
+    ldl?: number | null;
+    hdl?: number | null;
+    triglycerides?: number | null;
+    measuredAt: string;
+  } | null;
+  cholStatus: { label: string; alert: boolean } | null;
+  symptoms: { id: string; type: string; severity: number; createdAt: string }[];
 }
 
 type Tab = "dashboard" | "historial" | "chat" | "perfil";
@@ -161,7 +185,7 @@ export function DashboardApp() {
               <h1 className="font-bold text-slate-800 text-sm md:text-base truncate">
                 GlucoControl IPS
               </h1>
-              <p className="text-xs text-slate-500 truncate">Hola, {user.name}</p>
+              <p className="text-xs text-slate-500 truncate">Hola, {user.name} · Salud integral</p>
             </div>
           </div>
           <Link
@@ -200,10 +224,25 @@ export function DashboardApp() {
               onGlucoseClose={() => setShowGlucoseModal(false)}
             />
 
+            <VitalActions onSuccess={fetchDashboard} />
+
             <UpcomingRemindersBanner />
 
             {data && (
               <>
+                <HealthVitalsPanel
+                  latestBp={data.latestBp}
+                  bpStatus={data.bpStatus}
+                  latestWeight={data.latestWeight}
+                  bmi={data.bmi}
+                  bmiCategory={data.bmiCategory}
+                  latestHr={data.latestHr}
+                  hrStatus={data.hrStatus}
+                  latestChol={data.latestChol}
+                  cholStatus={data.cholStatus}
+                  symptoms={data.symptoms ?? []}
+                />
+
                 <StatsCards stats={data.stats} />
 
                 <div className="grid lg:grid-cols-2 gap-6">
@@ -278,6 +317,8 @@ function ProfilePanel({
   const [name, setName] = useState(user.name);
   const [diabetesType, setDiabetesType] = useState(user.diabetesType);
   const [doctorName, setDoctorName] = useState(user.doctorName ?? "");
+  const [heightCm, setHeightCm] = useState(user.heightCm != null ? String(user.heightCm) : "");
+  const [conditions, setConditions] = useState<string[]>(parseConditions(user.conditions));
   const [glucoseInterval, setGlucoseInterval] = useState(user.glucoseIntervalHours ?? 4);
   const [mealTimes, setMealTimes] = useState(parseMealTimes(user.mealTimes).join(", "));
   const [medications, setMedications] = useState<Medication[]>(
@@ -325,6 +366,8 @@ function ProfilePanel({
         name,
         diabetesType,
         doctorName,
+        heightCm: heightCm ? Number(heightCm) : null,
+        conditions,
         glucoseIntervalHours: glucoseInterval,
         mealTimes: times.length > 0 ? times : DEFAULT_REMINDERS.mealTimes,
         medications,
@@ -388,11 +431,49 @@ function ProfilePanel({
               onChange={(e) => setDiabetesType(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white"
             >
+              <option value="ninguna">Sin diabetes</option>
               <option value="tipo1">Tipo 1</option>
               <option value="tipo2">Tipo 2</option>
               <option value="gestacional">Gestacional</option>
               <option value="prediabetes">Prediabetes</option>
             </select>
+          </div>
+          <div>
+            <label className="text-sm text-slate-600 mb-1 block">Altura (cm)</label>
+            <input
+              type="number"
+              value={heightCm}
+              onChange={(e) => setHeightCm(e.target.value)}
+              placeholder="165"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-400 outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-sm text-slate-600 mb-2 block">Condiciones de salud</label>
+            <div className="flex flex-wrap gap-2">
+              {HEALTH_CONDITIONS.map((c) => {
+                const selected = conditions.includes(c.id);
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() =>
+                      setConditions((prev) =>
+                        selected ? prev.filter((x) => x !== c.id) : [...prev, c.id]
+                      )
+                    }
+                    className={cn(
+                      "px-3 py-1.5 rounded-full text-xs font-medium border transition",
+                      selected
+                        ? "bg-emerald-100 border-emerald-300 text-emerald-800"
+                        : "bg-white border-slate-200 text-slate-600"
+                    )}
+                  >
+                    {c.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div>
             <label className="text-sm text-slate-600 mb-1 block">Médico asignado (IPS)</label>

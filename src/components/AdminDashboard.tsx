@@ -29,13 +29,16 @@ interface PatientRow {
   name: string;
   email: string;
   diabetesType: string;
-  targetMin: number;
-  targetMax: number;
-  profileComplete: boolean;
+  conditionsList?: string[];
   latestGlucose: number | null;
   latestGlucoseAt: string | null;
   glucoseStatus: string;
   glucoseAlert: boolean;
+  latestBp?: string | null;
+  bpStatus?: string;
+  bpAlert?: boolean;
+  symptomAlert?: boolean;
+  anyAlert?: boolean;
   mealsToday: number;
   readingsToday: number;
   stats: StatsSummary;
@@ -108,6 +111,7 @@ export function AdminDashboard() {
       return p.name.toLowerCase().includes(q) || p.email.toLowerCase().includes(q);
     })
     .sort((a, b) => {
+      if (!!a.anyAlert !== !!b.anyAlert) return a.anyAlert ? -1 : 1;
       if (a.glucoseAlert !== b.glucoseAlert) return a.glucoseAlert ? -1 : 1;
       return 0;
     });
@@ -227,10 +231,10 @@ export function AdminDashboard() {
                   <thead>
                     <tr className="bg-slate-50/80 text-left text-xs text-slate-500 uppercase tracking-wide">
                       <th className="px-4 py-3 font-semibold">Paciente</th>
-                      <th className="px-4 py-3 font-semibold">Diabetes</th>
+                      <th className="px-4 py-3 font-semibold">Perfil</th>
                       <th className="px-4 py-3 font-semibold">Última glucosa</th>
+                      <th className="px-4 py-3 font-semibold">Presión</th>
                       <th className="px-4 py-3 font-semibold">Hoy</th>
-                      <th className="px-4 py-3 font-semibold">Promedio</th>
                       <th className="px-4 py-3 font-semibold"></th>
                     </tr>
                   </thead>
@@ -249,8 +253,17 @@ export function AdminDashboard() {
                           <td className="px-4 py-3">
                             <p className="font-medium text-slate-800">{p.name}</p>
                             <p className="text-xs text-slate-400 truncate max-w-[180px]">{p.email}</p>
+                            {p.anyAlert && (
+                              <span className="inline-block mt-1 text-[10px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
+                                Alerta
+                              </span>
+                            )}
                           </td>
-                          <td className="px-4 py-3 capitalize text-slate-600">{p.diabetesType}</td>
+                          <td className="px-4 py-3 text-slate-600 text-xs">
+                            {(p.conditionsList ?? []).length
+                              ? (p.conditionsList ?? []).join(", ")
+                              : p.diabetesType}
+                          </td>
                           <td className="px-4 py-3">
                             {p.latestGlucose != null ? (
                               <div>
@@ -271,20 +284,23 @@ export function AdminDashboard() {
                               <span className="text-slate-400">Sin registros</span>
                             )}
                           </td>
+                          <td className="px-4 py-3">
+                            {p.latestBp ? (
+                              <div>
+                                <p className={cn("font-semibold", p.bpAlert ? "text-red-600" : "text-slate-800")}>
+                                  {p.latestBp}
+                                </p>
+                                <p className="text-xs text-slate-400">{p.bpStatus}</p>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400">—</span>
+                            )}
+                          </td>
                           <td className="px-4 py-3 text-slate-600">
                             <p>{p.readingsToday} glucosa</p>
                             <p>{p.mealsToday} comidas</p>
-                          </td>
-                          <td className="px-4 py-3 text-slate-600">
-                            {p.stats.avgGlucose != null ? (
-                              <>
-                                <p>{p.stats.avgGlucose} mg/dL</p>
-                                <p className="text-xs text-slate-400">
-                                  {p.stats.inRangePercent ?? 0}% en rango
-                                </p>
-                              </>
-                            ) : (
-                              "—"
+                            {p.symptomAlert && (
+                              <p className="text-xs text-red-600 font-medium">Síntoma alerta</p>
                             )}
                           </td>
                           <td className="px-4 py-3 text-right">

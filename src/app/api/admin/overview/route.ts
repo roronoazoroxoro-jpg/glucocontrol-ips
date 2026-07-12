@@ -10,6 +10,7 @@ import {
   staffUnauthorizedResponse,
   type Period,
 } from "@/lib/admin";
+import { getBpStatus, parseConditions } from "@/lib/health";
 import { startOfDay } from "date-fns";
 
 export const runtime = "nodejs";
@@ -33,7 +34,15 @@ export async function GET(request: Request) {
 
     const patientRows = await Promise.all(
       patients.map(async (patient) => {
-        const [latestReading, readings, meals, mealsToday, readingsToday] = await Promise.all([
+        const [
+          latestReading,
+          readings,
+          meals,
+          mealsToday,
+          readingsToday,
+          latestBp,
+          latestSymptom,
+        ] = await Promise.all([
           prisma.glucoseReading.findFirst({
             where: { userId: patient.id },
             orderBy: { createdAt: "desc" },
@@ -50,19 +59,44 @@ export async function GET(request: Request) {
           prisma.glucoseReading.count({
             where: { userId: patient.id, createdAt: { gte: todayStart } },
           }),
+          prisma.bloodPressureReading.findFirst({
+            where: { userId: patient.id },
+            orderBy: { createdAt: "desc" },
+          }),
+          prisma.symptomLog.findFirst({
+            where: {
+              userId: patient.id,
+              OR: [
+                { severity: { gte: 4 } },
+                { type: { in: ["dolor_pecho", "falta_aire"] } },
+              ],
+              createdAt: { gte: todayStart },
+            },
+            orderBy: { createdAt: "desc" },
+          }),
         ]);
 
         const stats = computeStats(readings, meals, patient.targetMin, patient.targetMax);
         const glucoseMeta = latestReading
           ? glucoseStatusLabel(latestReading.value, patient.targetMin, patient.targetMax)
           : null;
+        const bpMeta = latestBp ? getBpStatus(latestBp.systolic, latestBp.diastolic) : null;
+        const anyAlert = !!(glucoseMeta?.alert || bpMeta?.alert || latestSymptom);
 
         return {
           ...sanitizePatientSummary(patient),
+          conditionsList: parseConditions(patient.conditions),
           latestGlucose: latestReading?.value ?? null,
           latestGlucoseAt: latestReading?.createdAt ?? null,
           glucoseStatus: glucoseMeta?.label ?? "Sin datos",
           glucoseAlert: glucoseMeta?.alert ?? false,
+          latestBp: latestBp
+            ? `${latestBp.systolic}/${latestBp.diastolic}`
+            : null,
+          bpStatus: bpMeta?.label ?? "Sin datos",
+          bpAlert: bpMeta?.alert ?? false,
+          symptomAlert: !!latestSymptom,
+          anyAlert,
           mealsToday,
           readingsToday,
           stats,
@@ -70,7 +104,7 @@ export async function GET(request: Request) {
       })
     );
 
-    const alerts = patientRows.filter((p) => p.glucoseAlert).length;
+    const alerts = patientRows.filter((p) => p.anyAlert).length;
     const activeToday = patientRows.filter((p) => p.mealsToday > 0 || p.readingsToday > 0).length;
 
     return NextResponse.json({

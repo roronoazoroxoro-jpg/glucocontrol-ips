@@ -13,9 +13,13 @@ model User {
   passwordHash           String
   name                   String
   role                   String   @default("patient")
-  diabetesType           String   @default("tipo2")
+  diabetesType           String   @default("ninguna")
+  conditions             String   @default("[]")
+  heightCm               Float?
   targetMin              Int      @default(70)
   targetMax              Int      @default(140)
+  bpTargetSys            Int      @default(130)
+  bpTargetDia            Int      @default(80)
   doctorName             String?
   medications            String?
   mealTimes              String?
@@ -26,9 +30,14 @@ model User {
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
-  glucoseReadings GlucoseReading[]
-  meals           MealEntry[]
-  chatMessages    ChatMessage[]
+  glucoseReadings    GlucoseReading[]
+  meals              MealEntry[]
+  chatMessages       ChatMessage[]
+  bloodPressures     BloodPressureReading[]
+  weightEntries      WeightEntry[]
+  heartRates         HeartRateReading[]
+  cholesterolLabs    CholesterolLab[]
+  symptomLogs        SymptomLog[]
 }
 
 model GlucoseReading {
@@ -82,4 +91,70 @@ model NutritionCache {
   query     String   @unique
   result    String
   createdAt DateTime @default(now())
+}
+
+model BloodPressureReading {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  systolic   Int
+  diastolic  Int
+  pulse      Int?
+  notes      String?
+  source     String   @default("manual")
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model WeightEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weightKg  Float
+  notes     String?
+  source    String   @default("manual")
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model HeartRateReading {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bpm       Int
+  context   String   @default("reposo")
+  notes     String?
+  source    String   @default("manual")
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model CholesterolLab {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  total         Float?
+  ldl           Float?
+  hdl           Float?
+  triglycerides Float?
+  notes         String?
+  measuredAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  @@index([userId, measuredAt])
+}
+
+model SymptomLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  severity  Int      @default(2)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }

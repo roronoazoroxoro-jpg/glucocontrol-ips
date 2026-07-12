@@ -66,13 +66,13 @@ export function DownloadPage() {
     },
     {
       icon: Activity,
-      title: "Monitoreo de glucosa",
-      desc: "Registra y visualiza tu nivel de azúcar en sangre con gráficos claros.",
+      title: "Glucosa, presión y pulso",
+      desc: "Registrá glucosa, presión arterial y frecuencia cardíaca con alertas claras para vos y tu médico.",
     },
     {
       icon: Utensils,
-      title: "Qué comer y beber",
-      desc: "Recomendaciones personalizadas según tu glucosa actual.",
+      title: "Peso, IMC y colesterol",
+      desc: "Seguí tu peso, índice de masa corporal y laboratorio de lípidos en un solo lugar.",
     },
     {
       icon: Brain,
@@ -105,7 +105,7 @@ export function DownloadPage() {
             GlucoControl IPS
           </h1>
           <p className="text-emerald-100 text-lg md:text-xl max-w-2xl mx-auto mb-2">
-            Tu asistente inteligente de diabetes
+            Tu asistente inteligente de salud integral
           </p>
           <p className="text-emerald-200/80 text-sm md:text-base max-w-xl mx-auto">
             Instituto de Previsión Social · Posadas, Misiones

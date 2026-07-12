@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma, withDbTimeout } from "@/lib/db";
 import { dbErrorResponse } from "@/lib/api-error";
 import { ensureProductionDatabase } from "@/lib/init-db";
-import { DEFAULT_REMINDERS } from "@/lib/reminders";
 import {
   getSessionUser,
   sanitizeUser,
@@ -32,8 +31,12 @@ export async function POST(request: Request) {
     const {
       name,
       diabetesType,
+      conditions,
+      heightCm,
       targetMin,
       targetMax,
+      bpTargetSys,
+      bpTargetDia,
       doctorName,
       medications,
       mealTimes,
@@ -45,14 +48,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "El nombre es requerido" }, { status: 400 });
     }
 
+    const conditionsArr = Array.isArray(conditions) ? conditions : [];
+    const hasDiabetes = conditionsArr.includes("diabetes");
+
     const user = await withDbTimeout(
       prisma.user.update({
         where: { id: sessionUser.id },
         data: {
           name: name.trim(),
-          diabetesType: diabetesType ?? "tipo2",
+          diabetesType: diabetesType ?? (hasDiabetes ? "tipo2" : "ninguna"),
+          conditions: JSON.stringify(conditionsArr),
+          heightCm: heightCm != null && heightCm !== "" ? Number(heightCm) : null,
           targetMin: targetMin ?? 70,
           targetMax: targetMax ?? 140,
+          bpTargetSys: bpTargetSys ?? 130,
+          bpTargetDia: bpTargetDia ?? 80,
           doctorName: doctorName?.trim() || null,
           medications: medications ? JSON.stringify(medications) : undefined,
           mealTimes: mealTimes ? JSON.stringify(mealTimes) : undefined,
@@ -79,8 +89,14 @@ export async function PATCH(request: Request) {
 
     if (body.name?.trim()) data.name = body.name.trim();
     if (body.diabetesType) data.diabetesType = body.diabetesType;
+    if (body.conditions) data.conditions = JSON.stringify(body.conditions);
+    if (body.heightCm !== undefined) {
+      data.heightCm = body.heightCm != null && body.heightCm !== "" ? Number(body.heightCm) : null;
+    }
     if (body.targetMin != null) data.targetMin = body.targetMin;
     if (body.targetMax != null) data.targetMax = body.targetMax;
+    if (body.bpTargetSys != null) data.bpTargetSys = body.bpTargetSys;
+    if (body.bpTargetDia != null) data.bpTargetDia = body.bpTargetDia;
     if (body.doctorName !== undefined) data.doctorName = body.doctorName?.trim() || null;
     if (body.medications) data.medications = JSON.stringify(body.medications);
     if (body.mealTimes) data.mealTimes = JSON.stringify(body.mealTimes);

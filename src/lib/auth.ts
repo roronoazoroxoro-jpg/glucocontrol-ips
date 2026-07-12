@@ -86,6 +86,10 @@ export function sanitizeUser(user: {
   notificationsEnabled: boolean;
   profileComplete: boolean;
   role?: string;
+  conditions?: string | null;
+  heightCm?: number | null;
+  bpTargetSys?: number | null;
+  bpTargetDia?: number | null;
   createdAt: Date;
 }) {
   return {
@@ -94,8 +98,12 @@ export function sanitizeUser(user: {
     name: user.name,
     role: user.role ?? "patient",
     diabetesType: user.diabetesType,
+    conditions: user.conditions ?? "[]",
+    heightCm: user.heightCm ?? null,
     targetMin: user.targetMin,
     targetMax: user.targetMax,
+    bpTargetSys: user.bpTargetSys ?? 130,
+    bpTargetDia: user.bpTargetDia ?? 80,
     doctorName: user.doctorName,
     medications: user.medications,
     mealTimes: user.mealTimes,

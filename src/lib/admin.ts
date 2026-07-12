@@ -47,12 +47,16 @@ export function sanitizePatientSummary(user: {
   profileComplete: boolean;
   createdAt: Date;
   updatedAt: Date;
+  conditions?: string | null;
+  heightCm?: number | null;
 }) {
   return {
     id: user.id,
     email: user.email,
     name: user.name,
     diabetesType: user.diabetesType,
+    conditions: user.conditions ?? "[]",
+    heightCm: user.heightCm ?? null,
     targetMin: user.targetMin,
     targetMax: user.targetMax,
     doctorName: user.doctorName,

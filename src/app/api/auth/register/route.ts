@@ -52,6 +52,8 @@ export async function POST(request: Request) {
           email: normalizedEmail,
           passwordHash,
           name: name.trim(),
+          diabetesType: "ninguna",
+          conditions: "[]",
           mealTimes: JSON.stringify(DEFAULT_REMINDERS.mealTimes),
           medications: JSON.stringify([]),
           acceptedTermsAt: new Date(),
