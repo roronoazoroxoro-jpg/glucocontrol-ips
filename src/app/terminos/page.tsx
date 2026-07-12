@@ -3,7 +3,7 @@ import { IPSLogo } from "@/components/IPSLogo";
 import { Footer } from "@/components/Footer";
 
 export const metadata = {
-  title: "Términos de Uso — GlucoControl IPS",
+  title: "Términos de Uso — VitalIPS",
 };
 
 export default function TerminosPage() {
@@ -19,13 +19,13 @@ export default function TerminosPage() {
 
         <div className="space-y-4 text-slate-700 leading-relaxed text-sm">
           <p>
-            Al usar GlucoControl IPS usted acepta estos términos. Si no está de acuerdo, no
+            Al usar VitalIPS usted acepta estos términos. Si no está de acuerdo, no
             utilice la aplicación.
           </p>
 
           <h2 className="text-lg font-semibold text-slate-800 pt-2">Naturaleza del servicio</h2>
           <p>
-            GlucoControl IPS es una <strong>herramienta de apoyo informativo</strong> del
+            VitalIPS es una <strong>herramienta de apoyo informativo</strong> del
             Instituto de Previsión Social de Misiones. <strong>No es un dispositivo médico</strong>{" "}
             ni reemplaza la consulta, diagnóstico o tratamiento de un profesional de la salud.
           </p>

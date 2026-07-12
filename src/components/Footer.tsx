@@ -9,7 +9,7 @@ export function Footer() {
       <div className="max-w-4xl mx-auto px-4 py-6 text-center space-y-3">
         <IPSLogo size="sm" />
         <p className="text-xs text-slate-500 leading-relaxed max-w-md mx-auto">
-          GlucoControl IPS — Instituto de Previsión Social de Misiones, Posadas.
+          VitalIPS — Instituto de Previsión Social de Misiones, Posadas.
           Herramienta de apoyo. No reemplaza la consulta médica profesional.
         </p>
         <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs">

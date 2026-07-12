@@ -16,7 +16,7 @@ const root = join(__dirname, "..");
 let key = process.argv[2]?.trim();
 
 async function promptKey() {
-  console.log("\n🔑 GlucoControl IPS — Configurar análisis de foto con IA\n");
+  console.log("\n🔑 VitalIPS — Configurar análisis de foto con IA\n");
   console.log("Obtené tu clave GRATIS en: https://aistudio.google.com/app/apikey\n");
 
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });

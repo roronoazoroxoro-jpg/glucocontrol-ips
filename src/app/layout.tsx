@@ -1,17 +1,38 @@
 import type { Metadata } from "next";
+import { Fraunces, Outfit } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "GlucoControl IPS — Posadas, Misiones",
+  title: "VitalIPS — Salud integral · Posadas, Misiones",
   description:
-    "Asistente inteligente de diabetes del Instituto de Previsión Social de Misiones. Seguimiento de glucosa, alimentación y voz con IA.",
-  keywords: ["diabetes", "glucosa", "IPSM", "IPS Misiones", "Posadas", "obra social", "salud"],
-  applicationName: "GlucoControl IPS",
+    "VitalIPS del Instituto de Previsión Social de Misiones. Seguimiento de glucosa, presión, peso, corazón, alimentación y síntomas con IA.",
+  keywords: [
+    "VitalIPS",
+    "IPS Misiones",
+    "salud integral",
+    "diabetes",
+    "presión arterial",
+    "Posadas",
+    "obra social",
+  ],
+  applicationName: "VitalIPS",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "GlucoControl IPS",
+    title: "VitalIPS",
   },
   formatDetection: {
     telephone: false,
@@ -32,7 +53,7 @@ export const viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover" as const,
-  themeColor: "#047857",
+  themeColor: "#0b4f8c",
 };
 
 export default function RootLayout({
@@ -41,12 +62,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es-AR">
+    <html lang="es-AR" className={`${outfit.variable} ${fraunces.variable}`}>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
-      <body className="antialiased safe-bottom">
+      <body className="font-sans antialiased safe-bottom">
         <ServiceWorkerRegister />
         {children}
       </body>

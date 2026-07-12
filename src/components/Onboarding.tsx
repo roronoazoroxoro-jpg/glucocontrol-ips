@@ -10,6 +10,7 @@ import {
   User,
 } from "lucide-react";
 import { IPSLogo } from "./IPSLogo";
+import { BrandMark } from "./BrandMark";
 import { requestNotificationPermission } from "@/lib/reminders";
 import { HEALTH_CONDITIONS } from "@/lib/health";
 import { cn } from "@/lib/utils";
@@ -75,11 +76,11 @@ export function Onboarding({ onComplete, initialName }: OnboardingProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 safe-top">
-      <div className="glass-card rounded-3xl p-6 md:p-10 max-w-lg w-full">
+      <div className="glass-card rounded-3xl p-6 md:p-10 max-w-lg w-full animate-scale-in">
         <div className="flex flex-col items-center mb-6 pt-2">
           <IPSLogo size="lg" showText />
           <div className="mt-4 text-center">
-            <h1 className="text-xl font-bold gradient-text">GlucoControl IPS</h1>
+            <BrandMark size="md" />
             <p className="text-sm text-slate-500 mt-1">
               Salud integral · Posadas, Misiones
             </p>

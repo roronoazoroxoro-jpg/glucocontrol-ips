@@ -41,7 +41,7 @@ export async function GET(request: Request) {
 <html lang="es-AR">
 <head>
   <meta charset="utf-8"/>
-  <title>Informe GlucoControl — ${user.name}</title>
+  <title>Informe VitalIPS — ${user.name}</title>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #0f172a; }
     h1 { color: #047857; font-size: 1.4rem; }
@@ -54,7 +54,7 @@ export async function GET(request: Request) {
   </style>
 </head>
 <body>
-  <h1>GlucoControl IPS — Informe de salud</h1>
+  <h1>VitalIPS — Informe de salud</h1>
   <p><strong>Paciente:</strong> ${user.name}<br/>
   <strong>Email:</strong> ${user.email}<br/>
   <strong>Tipo diabetes:</strong> ${user.diabetesType}<br/>

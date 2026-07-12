@@ -36,8 +36,8 @@ export function HealthVitalsPanel({
   symptoms,
 }: HealthVitalsPanelProps) {
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-slate-800 text-sm">Signos vitales y salud</h3>
+    <div className="space-y-4 animate-fade-up">
+      <h3 className="font-display font-semibold text-navy-900 text-base">Signos vitales y salud</h3>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <VitalCard
           icon={Activity}

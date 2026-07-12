@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { IPSLogo } from "./IPSLogo";
+import { BrandMark } from "./BrandMark";
 
 type AuthMode = "login" | "register";
 
@@ -64,14 +65,15 @@ export function AuthForm({ mode }: AuthFormProps) {
   return (
     <div className="min-h-screen flex flex-col safe-top">
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="glass-card rounded-3xl p-6 md:p-10 max-w-md w-full">
+        <div className="glass-card rounded-3xl p-6 md:p-10 max-w-md w-full animate-scale-in">
           <div className="flex flex-col items-center mb-8">
             <IPSLogo size="lg" showText />
-            <h1 className="text-xl font-bold gradient-text mt-4">
+            <BrandMark size="md" className="mt-4" />
+            <h1 className="text-lg font-semibold text-slate-700 mt-3">
               {isRegister ? "Crear cuenta" : "Iniciar sesión"}
             </h1>
             <p className="text-sm text-slate-500 mt-1 text-center">
-              GlucoControl IPS · Posadas, Misiones
+              Salud integral · Posadas, Misiones
             </p>
           </div>
 

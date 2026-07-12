@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Lock, Mail, Stethoscope } from "lucide-react";
 import { IPSLogo } from "./IPSLogo";
+import { BrandMark } from "./BrandMark";
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -49,14 +50,15 @@ export function AdminLoginForm() {
   return (
     <div className="min-h-screen flex flex-col safe-top bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="glass-card rounded-3xl p-6 md:p-10 max-w-md w-full border border-blue-100">
+        <div className="glass-card rounded-3xl p-6 md:p-10 max-w-md w-full border border-blue-100 animate-scale-in">
           <div className="flex flex-col items-center mb-8">
             <IPSLogo size="lg" showText />
-            <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">
+            <BrandMark size="md" className="mt-4" />
+            <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">
               <Stethoscope className="w-3.5 h-3.5" />
               Panel médico IPS
             </div>
-            <h1 className="text-xl font-bold text-slate-800 mt-4">Acceso para doctores</h1>
+            <h1 className="text-lg font-semibold text-slate-800 mt-4">Acceso para doctores</h1>
             <p className="text-sm text-slate-500 mt-1 text-center">
               Seguimiento de pacientes en tiempo real
             </p>

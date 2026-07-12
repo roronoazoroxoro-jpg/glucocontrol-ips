@@ -62,7 +62,7 @@ export function InstallPrompt() {
           </div>
           <p className="text-xs text-slate-600 leading-relaxed">
             Toca <strong>Compartir</strong> en Safari y luego{" "}
-            <strong>Agregar a pantalla de inicio</strong> para instalar GlucoControl IPS.
+            <strong>Agregar a pantalla de inicio</strong> para instalar VitalIPS.
           </p>
         </div>
       </div>
@@ -76,7 +76,7 @@ export function InstallPrompt() {
       <div className="glass-card rounded-2xl p-4 shadow-lg border border-emerald-200">
         <div className="flex justify-between items-start gap-2 mb-3">
           <div>
-            <p className="text-sm font-semibold text-slate-800">Instalar GlucoControl IPS</p>
+            <p className="text-sm font-semibold text-slate-800">Instalar VitalIPS</p>
             <p className="text-xs text-slate-500 mt-0.5">
               Acceso rápido desde tu celular, como una app
             </p>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "glucocontrol-ips-v4";
+const CACHE_NAME = "vitalips-v1";
 const STATIC_ASSETS = [
   "/manifest.webmanifest",
   "/branding/ips-logo.svg",

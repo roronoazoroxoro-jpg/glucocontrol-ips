@@ -67,7 +67,7 @@ export async function GET(
   </style>
 </head>
 <body>
-  <h1>GlucoControl IPS — Informe médico</h1>
+  <h1>VitalIPS — Informe médico</h1>
   <p><strong>Paciente:</strong> ${patient.name}<br/>
   <strong>Email:</strong> ${patient.email}<br/>
   <strong>Tipo diabetes:</strong> ${patient.diabetesType}<br/>

@@ -3,7 +3,7 @@ import { IPSLogo } from "@/components/IPSLogo";
 import { Footer } from "@/components/Footer";
 
 export const metadata = {
-  title: "Política de Privacidad — GlucoControl IPS",
+  title: "Política de Privacidad — VitalIPS",
 };
 
 export default function PrivacidadPage() {
@@ -19,7 +19,7 @@ export default function PrivacidadPage() {
 
         <div className="prose prose-sm prose-slate max-w-none space-y-4 text-slate-700 leading-relaxed">
           <p>
-            GlucoControl IPS es operado en el marco del Instituto de Previsión Social de
+            VitalIPS es operado en el marco del Instituto de Previsión Social de
             Misiones (IPSM), Posadas. Esta política describe cómo tratamos sus datos de salud
             y personales.
           </p>

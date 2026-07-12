@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Activity, Download, FileText, LayoutDashboard, LogOut, MessageSquare, RefreshCw, Settings } from "lucide-react";
 import { IPSLogo } from "./IPSLogo";
+import { BrandMark } from "./BrandMark";
 import { Onboarding } from "./Onboarding";
 import { GlucoseCard } from "./GlucoseCard";
 import { RecommendationsPanel } from "./RecommendationsPanel";
@@ -136,9 +137,10 @@ export function DashboardApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 safe-top">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 safe-top animate-fade-in">
         <IPSLogo size="md" />
-        <p className="text-sm text-slate-500">Cargando GlucoControl IPS...</p>
+        <BrandMark size="sm" />
+        <p className="text-sm text-slate-500">Cargando VitalIPS...</p>
       </div>
     );
   }
@@ -177,15 +179,13 @@ export function DashboardApp() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 safe-bottom">
-      <header className="sticky top-0 z-30 glass-card border-b border-white/60 safe-top">
+      <header className="sticky top-0 z-30 glass-card border-b border-white/60 safe-top animate-fade-in">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0">
             <IPSLogo size="sm" className="shrink-0" />
             <div className="min-w-0">
-              <h1 className="font-bold text-slate-800 text-sm md:text-base truncate">
-                GlucoControl IPS
-              </h1>
-              <p className="text-xs text-slate-500 truncate">Hola, {user.name} · Salud integral</p>
+              <BrandMark size="sm" />
+              <p className="text-xs text-slate-500 truncate">Hola, {user.name}</p>
             </div>
           </div>
           <Link
@@ -604,7 +604,7 @@ function ProfilePanel({
 
       <div className="glass-card rounded-2xl p-4 bg-amber-50 border border-amber-200">
         <p className="text-xs text-amber-800 leading-relaxed">
-          <strong>Aviso médico:</strong> GlucoControl IPS es apoyo informativo del Instituto
+          <strong>Aviso médico:</strong> VitalIPS es apoyo informativo del Instituto
           de Previsión Social de Misiones. Consulte siempre con su médico asignado antes de
           cambiar medicación o alimentación.
         </p>

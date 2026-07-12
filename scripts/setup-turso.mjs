@@ -11,7 +11,7 @@ import { fileURLToPath } from "url";
 import { createClient } from "@libsql/client";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DB_NAME = "glucocontrol-ips";
+const DB_NAME = "VitalIPS-ips";
 
 async function main() {
   const org = process.env.TURSO_ORG;
@@ -20,7 +20,7 @@ async function main() {
   if (!org || !platformToken) {
     console.error("Faltan TURSO_ORG y TURSO_PLATFORM_TOKEN.");
     console.error("1. Creá cuenta en https://turso.tech");
-    console.error("2. turso auth login && turso auth api-tokens mint glucocontrol --org TU_ORG");
+    console.error("2. turso auth login && turso auth api-tokens mint VitalIPS --org TU_ORG");
     process.exit(1);
   }
 

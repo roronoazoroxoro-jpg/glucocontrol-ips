@@ -12,7 +12,7 @@ function getSecret() {
   if (!raw && process.env.NODE_ENV === "production") {
     console.warn("[auth] AUTH_SECRET no configurado — usar variable en Vercel");
   }
-  return new TextEncoder().encode(raw || "glucocontrol-dev-secret-cambiar-en-produccion");
+  return new TextEncoder().encode(raw || "VitalIPS-dev-secret-cambiar-en-produccion");
 }
 
 export async function hashPassword(password: string) {

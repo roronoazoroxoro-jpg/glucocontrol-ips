@@ -1,6 +1,6 @@
 {
-  "name": "glucocontrol",
-  "version": "3.0.0",
+  "name": "vitalips",
+  "version": "4.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",

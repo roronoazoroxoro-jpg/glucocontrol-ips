@@ -134,7 +134,7 @@ export function AdminDashboard() {
             <div className="min-w-0">
               <h1 className="font-bold text-slate-800 text-sm md:text-base truncate flex items-center gap-2">
                 <Stethoscope className="w-4 h-4 text-[#1e5a9e] shrink-0" />
-                Panel médico IPS
+                Panel médico VitalIPS
               </h1>
               <p className="text-xs text-slate-500 truncate">
                 {staff?.name} · {staff?.role === "admin" ? "Administrador" : "Médico"}
@@ -181,7 +181,7 @@ export function AdminDashboard() {
                 </p>
               </div>
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full w-fit">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-emerald-500 live-dot" />
                 En vivo
               </span>
             </div>

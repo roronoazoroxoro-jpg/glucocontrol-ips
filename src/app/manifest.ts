@@ -2,14 +2,14 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "GlucoControl IPS — Posadas, Misiones",
-    short_name: "GlucoControl IPS",
+    name: "VitalIPS — Salud integral · IPS Misiones",
+    short_name: "VitalIPS",
     description:
-      "Asistente inteligente de diabetes del Instituto de Previsión Social de Misiones. Seguimiento de glucosa, alimentación y voz con IA.",
+      "Salud integral del Instituto de Previsión Social de Misiones: glucosa, presión, peso, corazón, alimentación y síntomas.",
     start_url: "/app",
     display: "standalone",
-    background_color: "#f0fdf4",
-    theme_color: "#047857",
+    background_color: "#eef8f6",
+    theme_color: "#0b4f8c",
     orientation: "portrait-primary",
     lang: "es-AR",
     categories: ["health", "medical", "lifestyle"],

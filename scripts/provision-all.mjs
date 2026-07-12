@@ -10,7 +10,7 @@ import { fileURLToPath } from "url";
 import { createClient } from "@libsql/client";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DB_NAME = "glucocontrol-ips";
+const DB_NAME = "VitalIPS-ips";
 const TURSO = "wsl -d kali-linux bash -lc";
 const TOOLS = "/mnt/c/Users/mcneumaticos/Desktop/Proyecto para diabeticos/tools";
 
@@ -63,7 +63,7 @@ async function main() {
 
   console.log("\nEsquema aplicado. Redeploy...");
   execSync("npx vercel --prod --yes", { stdio: "inherit", cwd: join(__dirname, "..") });
-  console.log("\nListo: https://glucocontrol-ips.vercel.app/app");
+  console.log("\nListo: https://VitalIPS-ips.vercel.app/app");
 }
 
 main().catch((e) => {

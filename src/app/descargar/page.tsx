@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { DownloadPage } from "@/components/DownloadPage";
 
 export const metadata: Metadata = {
-  title: "Descargar GlucoControl IPS — Posadas, Misiones",
+  title: "Descargar VitalIPS — Posadas, Misiones",
   description:
-    "Descargá e instalá GlucoControl IPS en tu celular. Asistente de diabetes del Instituto de Previsión Social de Misiones.",
+    "Descargá e instalá VitalIPS en tu celular. Salud integral del Instituto de Previsión Social de Misiones.",
 };
 
 export default function DescargarPage() {
