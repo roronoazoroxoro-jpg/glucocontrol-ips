@@ -199,6 +199,16 @@ body {
     linear-gradient(145deg, #072a4a 0%, #0b4f8c 38%, #0f766e 78%, #115e59 100%);
 }
 
+.landing-pulse-line {
+  stroke-dasharray: 900;
+  stroke-dashoffset: 900;
+  animation: draw-pulse 2.8s ease-out 0.4s forwards;
+}
+
+@keyframes draw-pulse {
+  to { stroke-dashoffset: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
   .animate-fade-in,
@@ -207,8 +217,13 @@ body {
   .animate-float-delayed,
   .brand-wordmark,
   .pulse-ring,
-  .live-dot {
+  .live-dot,
+  .landing-pulse-line {
     animation: none !important;
+  }
+
+  .landing-pulse-line {
+    stroke-dashoffset: 0;
   }
 }
 
